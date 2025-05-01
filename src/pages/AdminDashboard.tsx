@@ -638,85 +638,96 @@ console.log("Current Auctions in the project:-----------------------------------
         case 'user-details':
           return (
             <div className="p-6 min-h-screen bg-gradient-to-br from-[#f5f7fa] to-[#c3cfe2]">
-            <h1 className="text-4xl font-bold text-gray-800 mb-10 text-center">User Management</h1>
-      
-            {/* 🔍 Search Box */}
-            <div className="mb-10 max-w-xl mx-auto">
-              <input
-                type="text"
-                placeholder="Search by name, email, or ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-5 py-3 rounded-full shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-              />
+  <h1 className="text-4xl font-bold text-gray-800 mb-10 text-center">User Management</h1>
+
+  {/* 🔍 Search Box */}
+  <div className="mb-10 max-w-xl mx-auto">
+    <input
+      type="text"
+      placeholder="Search by name, email, or ID..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full px-5 py-3 rounded-full shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+    />
+  </div>
+
+  {/* 🧍 User Cards */}
+  <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    {filteredUsers.length > 0 ? (
+      filteredUsers.map((user) => (
+        <div
+          key={user.id}
+          className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transform transition-transform hover:-translate-y-1 border border-gray-200 p-6 h-full overflow-hidden flex flex-col justify-between"
+        >
+          <div className="flex flex-col gap-4 overflow-hidden">
+            {/* User Info and Status */}
+            <div className="flex justify-between items-start flex-wrap overflow-hidden">
+              <div className="min-w-0">
+                <h2 className="text-xl font-semibold text-gray-800 truncate">{user.username}</h2>
+                <p className="text-sm text-gray-500 truncate">{user.email}</p>
+              </div>
+              <span
+  className={`text-xs font-medium px-3 py-1 mt-2 rounded-full ${
+    user.status?.toLowerCase() === 'verified'
+      ? 'bg-green-100 text-green-700'
+      : user.status?.toLowerCase() === 'pending'
+      ? 'bg-yellow-100 text-yellow-700'
+      : 'bg-gray-100 text-gray-700'
+  }`}
+>
+  {user.status || 'Unknown'}
+</span>
+
             </div>
-      
-            {/* 🧍 User Cards */}
-            <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <div
-                    key={user.id}
-                    className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transform transition-transform hover:-translate-y-1 border border-gray-200 p-6"
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h2 className="text-xl font-semibold text-gray-800">{user.username}</h2>
-                        <p className="text-sm text-gray-500">{user.email}</p>
-                      </div>
-                      <span
-                        className={`text-xs font-medium px-3 py-1 rounded-full ${
-                          user.status === 'active'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-600'
-                        }`}
-                      >
-                        {user.status}
-                      </span>
-                    </div>
-      
-                    <div className="mt-6 space-y-2">
-                      <p className="text-gray-600 text-sm mb-1">Account Visibility</p>
-                      <div className="flex items-center space-x-6">
-                        <label className="flex items-center cursor-pointer space-x-2">
-                          <input
-                            type="radio"
-                            name={`status-${user.id}`}
-                            checked={user.active === 1}
-                            onChange={() => handleStatusChange(user.id, 'active')}
-                            className="peer hidden"
-                          />
-                          <div className="w-4 h-4 rounded-full border-2 border-blue-500 peer-checked:bg-blue-500 transition-all"></div>
-                          <span className="text-sm text-gray-700">Active</span>
-                        </label>
-      
-                        <label className="flex items-center cursor-pointer space-x-2">
-                          <input
-                            type="radio"
-                            name={`status-${user.id}`}
-                            checked={user.active === 0}
-                            onChange={() => handleStatusChange(user.id, 'inactive')}
-                            className="peer hidden"
-                          />
-                          <div className="w-4 h-4 rounded-full border-2 border-yellow-500 peer-checked:bg-yellow-500 transition-all"></div>
-                          <span className="text-sm text-gray-700">Inactive</span>
-                        </label>
-      
-                        <Link
-                              to={`/VerifingDocuments/${user.id}  `}
-                              className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition inline-block text-center"
-                            >
-                              View Documents
-                            </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-gray-500 text-lg col-span-full">No matching users found.</p>
-              )}
+
+            {/* Status Controls */}
+            <div>
+              <p className="text-gray-600 text-sm mb-1">Account Visibility</p>
+              <div className="flex items-center space-x-6 overflow-hidden">
+                <label className="flex items-center cursor-pointer space-x-2">
+                  <input
+                    type="radio"
+                    name={`status-${user.id}`}
+                    checked={user.active === 1}
+                    onChange={() => handleStatusChange(user.id, 'active')}
+                    className="peer hidden"
+                  />
+                  <div className="w-4 h-4 rounded-full border-2 border-blue-500 peer-checked:bg-blue-500 transition-all"></div>
+                  <span className="text-sm text-gray-700">Active</span>
+                </label>
+
+                <label className="flex items-center cursor-pointer space-x-2">
+                  <input
+                    type="radio"
+                    name={`status-${user.id}`}
+                    checked={user.active === 0}
+                    onChange={() => handleStatusChange(user.id, 'inactive')}
+                    className="peer hidden"
+                  />
+                  <div className="w-4 h-4 rounded-full border-2 border-yellow-500 peer-checked:bg-yellow-500 transition-all"></div>
+                  <span className="text-sm text-gray-700">Inactive</span>
+                </label>
+              </div>
             </div>
-          </div> 
+          </div>
+
+          {/* 📄 View Documents Button */}
+          <div className="pt-6">
+            <Link
+              to={`/VerifingDocuments/${user.id}`}
+              className="block w-full text-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+            >
+              View Documents
+            </Link>
+          </div>
+        </div>
+      ))
+    ) : (
+      <p className="text-center text-gray-500 text-lg col-span-full">No matching users found.</p>
+    )}
+  </div>
+</div>
+
           
         );
           case 'completed-auctions':
@@ -857,7 +868,7 @@ console.log("Current Auctions in the project:-----------------------------------
                             ⏳ Ends: {new Date(auction.endDate).toLocaleString()}
                           </p>
                         </div>
-                        <Link to={`/auction/${auction.id}`}>
+                        <Link to={`/completed-auction/${auction.id}`}>
                           <button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm px-4 py-2 rounded-xl hover:scale-105 hover:shadow-lg transition-all">
                             View
                           </button>

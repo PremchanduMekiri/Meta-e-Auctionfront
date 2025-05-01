@@ -132,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-0'} h-full`}
+        className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-6' : 'ml-0'} h-full`}
         style={{ overflowX: 'hidden' }} // Prevents horizontal scroll in desktop view
       >
         {/* Main content goes here */}

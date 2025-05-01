@@ -171,19 +171,23 @@ useEffect(() => {
      {/* Hero Section */}
      <section className="bg-gradient-to-br from-blue-900 to-blue-800 text-white overflow-hidden">
   <div className="container mx-auto px-4 py-12">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      {/* Left Side - Image */}
-      <div className="relative h-[600px] rounded-2xl overflow-hidden">
-        <img 
-          src="https://images.pexels.com/photos/2760243/pexels-photo-2760243.jpeg?auto=compress&cs=tinysrgb&w=1600" 
-          alt="Industrial Scrap" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent" />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+
+      {/* Left Side - Centered Image */}
+      <div className="flex justify-center items-center">
+        <div className="relative w-full max-w-md h-[350px] rounded-2xl overflow-hidden">
+          <img 
+            src="https://images.pexels.com/photos/2760243/pexels-photo-2760243.jpeg?auto=compress&cs=tinysrgb&w=1600" 
+            alt="Industrial Scrap" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent" />
+        </div>
       </div>
 
       {/* Right Side - Auction Lists */}
       <div className="flex flex-col gap-4">
+
         {/* Current Auctions */}
         {currentauctions.length > 0 && (
           <div className="flex flex-col overflow-hidden bg-white/5 rounded-xl max-h-[300px]">
@@ -193,7 +197,7 @@ useEffect(() => {
                 Current Auctions
               </h2>
             </div>
-            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-transparent">
+            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-800 hover:scrollbar-thumb-blue-300">
               {currentauctions.map((auction) => (
                 <Link 
                   key={auction.id}
@@ -222,14 +226,14 @@ useEffect(() => {
 
         {/* Upcoming Auctions */}
         {newauction.length > 0 && (
-          <div className="flex flex-col overflow-hidden bg-white/5 rounded-xl max-h-[300px]">
+          <div className="flex flex-col overflow-hidden bg-white/5 rounded-xl max-h-[300px] mt-4"> 
             <div className="p-4 border-b border-white/10 bg-blue-900 z-10">
               <h2 className="text-xl font-bold flex items-center">
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Upcoming Auctions
               </h2>
             </div>
-            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-transparent">
+            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-800 hover:scrollbar-thumb-blue-300">
               {newauction.map((auction) => (
                 <Link 
                   key={auction.id}
@@ -265,7 +269,7 @@ useEffect(() => {
     </div>
   </div>
 </section>
-      
+
       {/* Categories Section */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">

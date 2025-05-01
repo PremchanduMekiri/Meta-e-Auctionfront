@@ -33,7 +33,7 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <Package className="h-8 w-8 text-blue-800" />
-            <span className="text-xl font-bold text-gray-900">Meta E Bid</span>
+            <span className="text-xl font-bold text-gray-900 ">Meta E Bid</span>
           </Link>
           
           {/* Desktop Navigation */}
