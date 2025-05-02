@@ -130,14 +130,17 @@ const AuctionListPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
       year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      month: 'short', // e.g., "May"
+      day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true     // Optional: use false for 24-hour format
     });
   };
+  
 
   return (
     <Layout>

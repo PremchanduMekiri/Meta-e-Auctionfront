@@ -428,8 +428,8 @@ const AuctionDetailPage: React.FC = () => {
     );
   }
 
-  const auctionEnded = hasEnded(auction.endDate);
-  const defaultImage = 'https://via.placeholder.com/800x600?text=No+Image+Available';
+  const auctionEnded = hasEnded(formatDate(auction.endDate));
+  const defaultImage = '/image1.png';
   const auctionImage = auction.image || defaultImage; // Assuming auction has an image field.
 
   return (
@@ -446,11 +446,11 @@ const AuctionDetailPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
               {/* Main Image */}
               <div className="relative bg-gray-100 aspect-video">
-                <img 
-                  src={auctionImage} 
-                  alt={auction.name} 
-                  className="w-full h-full object-contain"
-                />
+              <img 
+    src={auctionImage} 
+    alt={auction.name} 
+    className="w-full max-w-5xl object-contain rounded-lg shadow-md border-4 border-gray-200 h-300 mx-auto"
+  />
                 
                 {auctionEnded && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">

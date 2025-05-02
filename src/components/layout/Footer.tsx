@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <Package className="h-8 w-8 text-blue-400" />
-              <span className="text-xl font-bold text-white">ScrapBid</span>
+              <span className="text-xl font-bold text-white">Meta-e-Auction</span>
             </div>
             <p className="text-sm mb-4">
               The premier marketplace for scrap material auctions. Connect suppliers with buyers worldwide.

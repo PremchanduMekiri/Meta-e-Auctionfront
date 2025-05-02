@@ -169,7 +169,7 @@ useEffect(() => {
     <Layout>
       {/* Hero Section */}
      {/* Hero Section */}
-     <section className="bg-gradient-to-br from-blue-900 to-blue-800 text-white overflow-hidden">
+     <section className="bg-gradient-to-br from-blue-800 to-blue-800 text-white overflow-hidden">
   <div className="container mx-auto px-4 py-12">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
 
@@ -177,7 +177,7 @@ useEffect(() => {
       <div className="flex justify-center items-center">
         <div className="relative w-full max-w-md h-[350px] rounded-2xl overflow-hidden">
           <img 
-            src="https://images.pexels.com/photos/2760243/pexels-photo-2760243.jpeg?auto=compress&cs=tinysrgb&w=1600" 
+            src="/image2.png" 
             alt="Industrial Scrap" 
             className="w-full h-full object-cover"
           />
@@ -207,13 +207,13 @@ useEffect(() => {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
-                      <p className="text-base text-blue-200">{auction.description}</p>
+                      <p className="text-base text-black-200">{auction.description}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-amber-400">
                         {formatCurrency(auction.startingPrice)}
                       </p>
-                      <p className="text-sm text-red-200">
+                      <p className="text-sm text-red-900 font-bold">
                         {formatTimeRemaining(auction.endDate)}
                       </p>
                     </div>
@@ -226,7 +226,7 @@ useEffect(() => {
 
         {/* Upcoming Auctions */}
         {newauction.length > 0 && (
-          <div className="flex flex-col overflow-hidden bg-white/5 rounded-xl max-h-[300px] mt-4"> 
+          <div className="flex flex-col overflow-hidden bg-white rounded-xl max-h-[300px] mt-4"> 
             <div className="p-4 border-b border-white/10 bg-blue-900 z-10">
               <h2 className="text-xl font-bold flex items-center">
                 <TrendingUp className="h-5 w-5 mr-2" />
@@ -249,8 +249,8 @@ useEffect(() => {
                       <p className="text-lg font-bold text-amber-400">
                         {formatCurrency(auction.startingPrice)}
                       </p>
-                      <p className="text-sm text-blue-200">{auction.startDate}</p>
-                      <p className="text-sm text-blue-200">{auction.endDate}</p>
+                      <p className="text-sm text-green-200 font-bold">{auction.startDate}</p>
+                      <p className="text-sm text-yellow-200 font-bold">{auction.endDate}</p>
                     </div>
                   </div>
                 </Link>

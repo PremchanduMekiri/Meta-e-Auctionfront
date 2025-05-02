@@ -312,7 +312,7 @@ console.log("Current Auctions in the project:-----------------------------------
     });
 
 
-    const filteredAuctionss = currentauctions
+    const current = currentauctions
     .filter((auction) => {
       const matchesSearch =
         auction.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -337,7 +337,7 @@ console.log("Current Auctions in the project:-----------------------------------
 
   
 
-  const filteredEndedAuctions = ended
+  const end = ended
     .filter((auction) => {
       const matchesSearch =
         auction.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -462,8 +462,8 @@ console.log("Current Auctions in the project:-----------------------------------
     
           {/* Auction Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 overflow-y-auto max-h-[500px] pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-            {filteredAuctionss.length > 0 ? (
-              filteredAuctionss.map((auction) => (
+            {current.length > 0 ? (
+              current.map((auction) => (
                 <div
                   key={auction.id}
                   className="bg-white border border-gray-100 p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
@@ -483,8 +483,17 @@ console.log("Current Auctions in the project:-----------------------------------
                         ₹{auction.startingPrice.toFixed(2)}
                       </p>
                       <p className="text-xs text-gray-400">
-                        Ends: {new Date(auction.endDate).toLocaleString()}
-                      </p>
+  Ends: {new Date(auction.endDate).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  })}
+</p>
+
                     </div>
                   </Link>
     
@@ -768,8 +777,8 @@ console.log("Current Auctions in the project:-----------------------------------
 
         {/* 🖼️ Auction Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {filteredEndedAuctions.length > 0 ? (
-            filteredEndedAuctions.map((auction) => (
+          {end.length > 0 ? (
+            end.map((auction) => (
               <div
                 key={auction.id}
                 className="bg-white/80 backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-1"

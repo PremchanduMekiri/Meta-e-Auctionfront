@@ -566,9 +566,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       setIsLoading(false);
     }
   };
-  
-  
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-4 bg-white rounded shadow">
       <h2 className="text-xl font-semibold text-center">Sign In</h2>
