@@ -226,38 +226,42 @@ useEffect(() => {
 
         {/* Upcoming Auctions */}
         {newauction.length > 0 && (
-          <div className="flex flex-col overflow-hidden bg-white rounded-xl max-h-[300px] mt-4"> 
-            <div className="p-4 border-b border-white/10 bg-blue-900 z-10">
-              <h2 className="text-xl font-bold flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2" />
-                Upcoming Auctions
-              </h2>
+  <div className="flex flex-col overflow-hidden bg-white/5 rounded-xl max-h-[300px]">
+    <div className="p-4 border-b border-white/10 bg-blue-900 z-10">
+      <h2 className="text-xl font-bold flex items-center">
+        <TrendingUp className="h-5 w-5 mr-2" />
+        Upcomming Autions
+      </h2>
+    </div>
+    <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-800 hover:scrollbar-thumb-blue-300">
+      {newauction.map((auction) => (
+        <Link
+          key={auction.id}
+          to={{
+            pathname: `/auction/${auction.id}`,
+            state: { auction }  // Passing the auction object as state
+          }}
+          className="block bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-white/20 transition-colors"
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
+              <p className="text-base text-black-200">{auction.description}</p>
             </div>
-            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-800 hover:scrollbar-thumb-blue-300">
-              {newauction.map((auction) => (
-                <Link 
-                  key={auction.id}
-                  to={`/auction/${auction.id}`}
-                  className="block bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-white/20 transition-colors"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
-                      <p className="text-base text-blue-200">{auction.description}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-amber-400">
-                        {formatCurrency(auction.startingPrice)}
-                      </p>
-                      <p className="text-sm text-green-200 font-bold">{auction.startDate}</p>
-                      <p className="text-sm text-yellow-200 font-bold">{auction.endDate}</p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+            <div className="text-right">
+              <p className="text-lg font-bold text-amber-400">
+                {formatCurrency(auction.startingPrice)}
+              </p>
+              <p className="text-sm text-red-900 font-bold">
+                {formatTimeRemaining(auction.endDate)}
+              </p>
             </div>
           </div>
-        )}
+        </Link>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* No Auctions Message */}
         {currentauctions.length === 0 && newauction.length === 0 && (

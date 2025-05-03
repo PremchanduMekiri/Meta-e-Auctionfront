@@ -19,6 +19,7 @@ import UpdateAuctionForm from './pages/auctionUpdate';
 import CurrentAuctionDetailPage from './pages/CurrectAuctions';
 import DocumentVerificationForm from './components/auth/DocumentVerificationForm';
 import VerifyingDocuments from './pages/VerifyingDocuments';
+
 function App() {
   return (
     <AuthProvider>
@@ -31,7 +32,7 @@ function App() {
               element={<DocumentVerificationForm onSuccess={() => {}} onClose={() => {}} />} 
             />
             <Route path="/auctions" element={<AuctionListPage />} />
-            <Route path="/auction/:id" element={<AuctionDetailPage />} />
+            <Route path="/auction/:id" element={<AuctionDetailPage />} />   
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/services" element={<ServicesPage />} />

@@ -530,7 +530,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         await login(email, password);
         onSuccess();
 
-        if (userData.status === 'pending') {
+        if (userData.status === 'Not Uploaded') {
           navigate('/DocumentVerificationForm');
         } else {
           navigate('/');

@@ -606,7 +606,12 @@ const AuctionDetailPage: React.FC = () => {
             {!auctionEnded && (
               <BidForm auctionId={auction.id}
               currentBid={auction.startingPrice}
-  endDate={auction.endDate}/> 
+  endDate={auction.endDate}
+  startDate={auction.startDate}
+  auctionName={auction.name}
+  auctionDescription={auction.description}
+  auctionStatus={auction.status}
+  /> 
             )}
           </div>
         </div>
