@@ -6,7 +6,7 @@ import Button from '../components/ui/Button';
 import AuctionList from '../components/auctions/AuctionList';
 import { useAuctions } from '../context/AuctionContext';
 import { formatCurrency } from '../utils/formatters';
-import { formatTimeRemaining } from '../utils/dateUtils';
+import { formatDate, formatTimeRemaining } from '../utils/dateUtils';
 import Modal from '../components/ui/Modal';
 import RegisterForm from '../components/auth/RegisterForm';
 import DocumentVerificationForm from '../components/auth/DocumentVerificationForm';
@@ -253,9 +253,10 @@ useEffect(() => {
                 {formatCurrency(auction.startingPrice)}
               </p>
               <p className="text-sm text-red-900 font-bold">
-                {formatTimeRemaining(auction.endDate)}
+               Starting : {formatDate(auction.endDate)}
               </p>
             </div>
+            
           </div>
         </Link>
       ))}

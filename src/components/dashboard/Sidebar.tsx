@@ -75,7 +75,7 @@
 // export default Sidebar;
 import React, { useState } from 'react';
 import { FaUpload, FaEye, FaCheckCircle, FaUsers, FaList, FaBars, FaTimes } from 'react-icons/fa';
-
+import { FaCalendarAlt } from "react-icons/fa";
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
   // Reusable button style for active/inactive tabs
   const buttonClass = (tabName: string) =>
-    `w-full text-left px-4 py-2 ${activeTab === tabName ? 'bg-blue-600' : 'hover:bg-blue-500'}`;
+    `w-full text-left px-4 py-2 font-bold ${activeTab === tabName ? 'bg-blue-600' : 'hover:bg-green-500'}`;
 
   return (
     <div className="flex h-screen">
@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
       {/* Sidebar */}
       <div
-        className={`w-64 bg-gray-800 text-white flex flex-col fixed top-0 left-0 bottom-0 lg:relative lg:block z-10 ${
+        className={`w-64 bg-blue-800 text-white flex flex-col fixed top-0 left-0 bottom-0 lg:relative lg:black z-10 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
@@ -112,17 +112,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
           <div className="flex items-center justify-center p-4 text-2xl font-semibold">Admin</div>
           <div className="space-y-2">
             {/* Sidebar buttons */}
-            {['dashboard', 'upload-bid', 'current-bids', 'completed-auctions', 'user-details', 'all-auctions'].map((tab) => (
+            {['dashboard','all-auctions', 'upload-bid', 'current-bids', 'completed-auctions','upcomming-auctions','user-details'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => onTabChange(tab)}
                 className={buttonClass(tab)}
               >
+                {tab === 'all-auctions' && <FaList className="inline mr-2" />}
                 {tab === 'upload-bid' && <FaUpload className="inline mr-2" />}
                 {tab === 'current-bids' && <FaEye className="inline mr-2" />}
                 {tab === 'completed-auctions' && <FaCheckCircle className="inline mr-2" />}
+                {tab === 'upcomming-auctions' && <FaCalendarAlt className="inline mr-2 " />}
                 {tab === 'user-details' && <FaUsers className="inline mr-2" />}
-                {tab === 'all-auctions' && <FaList className="inline mr-2" />}
                 {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/-/g, ' ')} {/* Capitalize and format text */}
               </button>
             ))}

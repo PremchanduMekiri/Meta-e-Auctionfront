@@ -7,6 +7,13 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router-dom";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { FaGavel } from "react-icons/fa";
+import { FaCalendarAlt } from "react-icons/fa";
+import {FiEye} from "react-icons/fi";
+import {FiEdit2} from "react-icons/fi";
+import {FiTrash2} from "react-icons/fi";
+import{motion} from "framer-motion";
 // Define the User type
 interface User {
   id: string;
@@ -51,9 +58,29 @@ const [successMessage, setSuccessMessage] = useState('');
 const handleTabChange = (tab: string) => {
   setActiveTab(tab);
 };
+const formatToIST = (dateString: string) => {
+  const date = new Date(dateString);
+  
+  // Ensure the date is valid
+  if (isNaN(date.getTime())) {
+    console.error("Invalid date:", dateString);
+    return null;  // Return null if the date is invalid
+  }
+
+  // Convert the date to IST (UTC +5:30)
+  const istOffset = 5.5 * 60;  // IST offset in minutes
+  const localOffset = date.getTimezoneOffset();  // Local time zone offset in minutes
+
+  // Adjust the date to IST
+  date.setMinutes(date.getMinutes() + localOffset + istOffset);
+
+  return date;
+};
 
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
   const { name, value } = e.target;
+
+  // Store the value as a string for date fields
   setAuctionData((prevState) => ({
     ...prevState,
     [name]: value,
@@ -65,49 +92,49 @@ const handleSubmit = async (e: React.FormEvent) => {
   setErrorMessage('');
   setSuccessMessage('');
 
-  // Validate the form fields (if necessary, add validation here)
+  // Validate the form fields
   if (!auctionData.name || !auctionData.description || !auctionData.startingPrice || !auctionData.startDate || !auctionData.endDate) {
     setErrorMessage('Please fill in all required fields.');
     return;
   }
 
-  // Prepare the auction data for submission
-  // const formattedAuctionData = {
-  //   ...auctionData,
-  //   startingPrice: parseFloat(auctionData.startingPrice), // Ensure startingPrice is a number
-  //   startDate: new Date(auctionData.startDate).toISOString(), // Ensure startDate is in ISO format
-  //   endDate: new Date(auctionData.endDate).toISOString(), // Ensure endDate is in ISO format
-  // };
+  // Convert start and end date to IST
+  const startDateIST = formatToIST(auctionData.startDate);
+  const endDateIST = formatToIST(auctionData.endDate);
 
+  if (!startDateIST || !endDateIST) {
+    setErrorMessage('Invalid date provided.');
+    return;
+  }
+
+  // Format the auction data for submission
   const formattedAuctionData = {
     ...auctionData,
-    startDate: new Date(auctionData.startDate).toISOString(),
-    endDate: new Date(auctionData.endDate).toISOString(),
+    startDate: startDateIST.toISOString(),  // Convert to ISO string
+    endDate: endDateIST.toISOString(),  // Convert to ISO string
   };
 
-  // Log formatted auction data to verify the structure
   console.log('Formatted Auction Data:', formattedAuctionData);
 
   setIsSubmitting(true);
 
   try {
-    // Make sure you're sending the correct payload
+    // Send the data to the API
     const response = await axios.post('https://metaauction.onrender.com/admin/inserting/auction', formattedAuctionData);
-
-    // On success
+    
     setSuccessMessage('Auction created successfully!');
-    console.log('Auction Created', response.data);
+    console.log('Auction Created:', response.data);
   } catch (error: any) {
     if (error.response && error.response.data) {
       setErrorMessage('Failed to create auction: ' + error.response.data.message);
     } else {
       setErrorMessage('An unexpected error occurred.');
     }
-  }
-   finally {
+  } finally {
     setIsSubmitting(false);
   }
 };
+
 
   const [allAuctions, setAllAuctions] = useState([]); // Typed explicitly as Auction[]
 
@@ -192,7 +219,7 @@ console.log("Current Auctions in the project:-----------------------------------
  // Typed explicitly as Auction[]
   useEffect(() => {
     // Define the async function inside useEffect
-    const fetchViewAllViewsers = async () => {
+    const fetchEndedAuctions = async () => {
       try {
         const res = await axios.get('https://metaauction.onrender.com/auction/endedAuctions');
         console.log("current Connection Data|"+res.data); // You might want to check the data here
@@ -204,7 +231,7 @@ console.log("Current Auctions in the project:-----------------------------------
       }
     };
 
-    fetchViewAllViewsers(); // Call the async function
+    fetchEndedAuctions(); // Call the async function
   }, []);
 
 
@@ -371,56 +398,138 @@ console.log("Current Auctions in the project:-----------------------------------
     VerifingDocuments: { userId: number };
     // other screens...
   };
+
+
+  const [newauction, setNewauctions] = useState([]); // State to store the auction data
+
+  // Fetch upcoming auctions using useEffect
+  useEffect(() => {
+    const fetchUpcomingAuctions = async () => {
+      try {
+        const res = await axios.get('https://metaauction.onrender.com/auction/upcomingAuctions');
+        console.log(res.data); // You might want to check the data here
+        console.log("upcoming Connection Data|"+res.data); // You might want to check the data here
+        setNewauctions(res.data); // Set the auctions data
+      } catch (error) {
+        console.error("Error fetching auctions:", error);
+      }
+    };
+
+    fetchUpcomingAuctions(); // Call the async function
+  }, []); // Empty dependency array ensures this runs only once when the component mounts
+
+  // Log the newauction data after it is fetched
+  useEffect(() => {
+    console.log(newauction);
+    console.log("Upcoming Auctions in the project checking the dates ===:", {newauction});
+  }, [newauction]);
+
+  interface Auction {
+    id: number;
+    name: string;
+    description: string;
+    startingPrice: number;
+    startDate: string;
+    endDate: string;
+  }
+
+  const handleDeletes = async (auction: Auction) => {
+    console.log("Deleting auction with ID:", auction.id); // Debugging statement
+    console.log("Auction data being sent:", auction); // Log auction data to check for issues
+    try {
+      const response = await axios.delete(
+        "https://metaauction.onrender.com/admin/delete/auction",
+        {
+          data: { id: auction.id }, // ✅ Send only the ID in request body
+          withCredentials: true,    // ✅ Required if session-based auth
+        }
+      );
+  
+      console.log("✅ Auction deleted successfully:", response.data);
+      alert("✅ Auction deleted successfully");
+  
+      // ✅ Update local state
+      setAllAuctions((prev) => prev.filter((a) => a.id !== auction.id));
+      setCurrentauctions((prev) => prev.filter((a) => a.id !== auction.id));
+      setNewauctions((prev) => prev.filter((a) => a.id !== auction.id));
+    } catch (error) {
+      console.error("❌ Error deleting auction:", error);
+
+      alert("❌ Failed to delete auction . Please try again.");
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <div className="space-y-6">
-            <div className="text-2xl font-bold text-gray-800">
-              Scrap Auction Admin Dashboard
-              <p className="text-gray-500 text-lg font-normal mt-2">
-                Monitor and manage your scrap auction platform
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-                <div className="flex items-center">
-                  <FaHammer className="text-blue-500 text-2xl mr-4" />
-                  <div>
-                    <p className="text-gray-500">Active Auctions</p>
-                    <p className="text-2xl font-bold">{currentauctions.length}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                <div className="flex items-center">
-                  <FaCheckCircle className="text-green-500 text-2xl mr-4" />
-                  <div>
-                    <p className="text-gray-500">Completed Auctions</p>
-                    <p className="text-2xl font-bold">{ended.length}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                <div className="flex items-center">
-                  <FaCheckCircle className="text-green-500 text-2xl mr-4" />
-                  <div>
-                    <p className="text-gray-500">Total Auctions</p>
-                    <p className="text-2xl font-bold">{allAuctions.length}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
-                <div className="flex items-center">
-                  <FaUsers className="text-purple-500 text-2xl mr-4" />
-                  <div>
-                    <p className="text-gray-500">Total Users</p>
-                    <p className="text-2xl font-bold">{viewAlluser.length}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-8">
+          <div className="text-3xl font-bold text-gray-800">
+            Scrap Auction Admin Dashboard
+            <p className="text-gray-500 text-lg font-normal mt-2">
+              Monitor and manage your scrap auction platform
+            </p>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        
+            {/* Active Auctions */}
+            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500 transition-transform duration-300 hover:scale-105">
+              <div className="flex items-center space-x-4">
+                <FaHammer className="text-blue-500 text-3xl" />
+                <div>
+                  <p className="text-gray-600">Active Auctions</p>
+                  <p className="text-3xl font-bold text-gray-800">{currentauctions.length}</p>
+                </div>
+              </div>
+            </div>
+        
+            {/* Completed Auctions */}
+            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500 transition-transform duration-300 hover:scale-105">
+              <div className="flex items-center space-x-4">
+                <FaCheckCircle className="text-green-500 text-3xl" />
+                <div>
+                  <p className="text-gray-600">Completed Auctions</p>
+                  <p className="text-3xl font-bold text-gray-800">{ended.length}</p>
+                </div>
+              </div>
+            </div>
+        
+            {/* Total Auctions */}
+            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-orange-500 transition-transform duration-300 hover:scale-105">
+              <div className="flex items-center space-x-4">
+                <FaGavel className="text-orange-500 text-3xl" />
+                <div>
+                  <p className="text-gray-600">Total Auctions</p>
+                  <p className="text-3xl font-bold text-gray-800">{allAuctions.length}</p>
+                </div>
+              </div>
+            </div>
+        
+            {/* Upcoming Auctions */}
+            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-purple-500 transition-transform duration-300 hover:scale-105">
+              <div className="flex items-center space-x-4">
+                <FaCalendarAlt className="text-purple-500 text-3xl" />
+                <div>
+                  <p className="text-gray-600">Upcoming Auctions</p>
+                  <p className="text-3xl font-bold text-gray-800">{newauction.length}</p>
+                </div>
+              </div>
+            </div>
+        
+            {/* Total Users */}
+            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-indigo-500 transition-transform duration-300 hover:scale-105">
+              <div className="flex items-center space-x-4">
+                <FaUsers className="text-indigo-500 text-3xl" />
+                <div>
+                  <p className="text-gray-600">Total Users</p>
+                  <p className="text-3xl font-bold text-gray-800">{viewAlluser.length}</p>
+                </div>
+              </div>
+            </div>
+        
+          </div>
+        </div>
+        
         );
         case 'current-bids':
         return (
@@ -741,163 +850,347 @@ console.log("Current Auctions in the project:-----------------------------------
         );
           case 'completed-auctions':
             return (
-              <div className="min-h-screen py-12 px-6 bg-gradient-to-br from-blue-100 via-white to-pink-100">
-      <div className="max-w-7xl mx-auto">
-        <h3 className="text-4xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-md">
-          Completed Auctions
-        </h3>
+              <div className="min-h-screen py-12 px-6 bg-gradient-to-br from-blue-100 via-white to-pink-100 overflow-hidden">
+  <div className="max-w-7xl mx-auto">
+    <h3 className="text-4xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-md">
+      Completed Auctions
+    </h3>
 
-        {/* 🔍 Filter Section */}
-        <div className="flex flex-wrap gap-4 mb-10 justify-center items-center">
-          <input
-            type="text"
-            placeholder="🔍 Search by name or ID"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[300px] shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-          />
-          <input
-            type="number"
-            placeholder="💰 Min Price"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all"
-          />
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-            className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[200px] shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
-          >
-            <option value="">🔃 Sort By</option>
-            <option value="endDate">📅 Ending Date</option>
-            <option value="highPrice">⬆️ Highest Price</option>
-            <option value="lowPrice">⬇️ Lowest Price</option>
-          </select>
-        </div>
-
-        {/* 🖼️ Auction Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {end.length > 0 ? (
-            end.map((auction) => (
-              <div
-                key={auction.id}
-                className="bg-white/80 backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-1"
-              >
-                <h4 className="text-xl font-semibold text-gray-800 mb-2 truncate">
-                  🏷️ {auction.name}
-                </h4>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                  {auction.description}
-                </p>
-
-                <div className="flex justify-between items-end mt-6">
-                  <div>
-                    <p className="text-xl font-bold text-amber-600">
-                      ₹{auction.startingPrice.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      ⏱️ {new Date(auction.endDate).toLocaleString()}
-                    </p>
-                  </div>
-                  <Link to={`/completed-auction/${auction.id}`}>
-                    <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-md hover:scale-105 hover:shadow-xl transition-transform duration-200">
-                      View →
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-600 text-lg col-span-full">
-              🚫 No auctions found.
-            </p>
-          )}
-        </div>
-      </div>
+    {/* 🔍 Filter Section */}
+    <div className="flex flex-wrap gap-4 mb-10 justify-center items-center">
+      <input
+        type="text"
+        placeholder="🔍 Search by name or ID"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[300px] shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <input
+        type="number"
+        placeholder="💰 Min Price"
+        value={minPrice}
+        onChange={(e) => setMinPrice(e.target.value)}
+        className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-md focus:outline-none focus:ring-2 focus:ring-amber-400"
+      />
+      <select
+        value={sortOption}
+        onChange={(e) => setSortOption(e.target.value)}
+        className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[200px] shadow-md focus:outline-none focus:ring-2 focus:ring-purple-400"
+      >
+        <option value="">🔃 Sort By</option>
+        <option value="endDate">📅 Ending Date</option>
+        <option value="highPrice">⬆️ Highest Price</option>
+        <option value="lowPrice">⬇️ Lowest Price</option>
+      </select>
     </div>
+
+    {/* 🖼️ Auction Cards */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      {end.length > 0 ? (
+        end.map((auction) => (
+          <div
+            key={auction.id}
+            className="relative bg-white/90 backdrop-blur-lg border border-gray-200 p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-1 overflow-hidden"
+          >
+            <h4 className="text-xl font-semibold text-gray-800 mb-2 truncate">
+              🏷️ {auction.name}
+            </h4>
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+              {auction.description}
+            </p>
+
+            <div className="flex justify-between items-end mt-6">
+              <div>
+                <p className="text-xl font-bold text-amber-600">
+                  ₹{auction.startingPrice.toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  ⏱️ {new Date(auction.endDate).toLocaleString()}
+                </p>
+              </div>
+              <Link to={`/completed-auction/${auction.id}`}>
+                <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-md hover:scale-105 hover:shadow-xl transition duration-200">
+                  View →
+                </button>
+              </Link>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdate(auction);
+                }}
+                className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white text-sm font-medium rounded-md transition-all duration-300"
+              >
+                <PencilSquareIcon className="h-5 w-5" />
+                Update
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeletes(auction);
+                }}
+                className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white text-sm font-medium rounded-md transition-all duration-300"
+              >
+                <TrashIcon className="h-5 w-5" />
+                Delete
+              </button>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-center text-gray-600 text-lg col-span-full">
+          🚫 No auctions found.
+        </p>
+      )}
+    </div>
+  </div>
+</div>
 
             )
           
 
         case 'all-auctions':
             return (
-              <div className="p-6 sm:p-10 bg-gradient-to-br from-indigo-50 via-white to-pink-50 min-h-screen">
-              <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-12 tracking-tight">
-                🎯 Auction Dashboard
-              </h2>
-        
-              {/* 🔎 Filter Section */}
-              <div className="flex flex-wrap gap-4 mb-10 justify-center">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name or ID"
-                  className="px-5 py-3 w-full sm:w-72 rounded-2xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+              <div className="p-8 bg-gradient-to-br from-gray-100 via-white to-gray-50 min-h-screen">
+  <motion.h2
+    className="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-10 tracking-wide"
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    🎯 Auction Dashboard
+  </motion.h2>
+
+  {/* 🔎 Filter Section */}
+  <motion.div
+    className="flex flex-wrap gap-4 justify-center mb-8"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.3, duration: 0.6 }}
+  >
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Search auctions..."
+      className="px-4 py-3 w-full sm:w-64 md:w-72 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-indigo-400 focus:outline-none"
+    />
+    <input
+      type="number"
+      value={minPrice}
+      onChange={(e) => setMinPrice(e.target.value)}
+      placeholder="Min Price"
+      className="px-4 py-3 w-full sm:w-40 md:w-52 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-amber-400 focus:outline-none"
+    />
+    <select
+      value={sortOption}
+      onChange={(e) => setSortOption(e.target.value)}
+      className="px-4 py-3 w-full sm:w-48 md:w-60 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-purple-400 focus:outline-none"
+    >
+      <option value="">Sort By</option>
+      <option value="startDate">Starting Date</option>
+      <option value="endDate">Ending Date</option>
+      <option value="highPrice">Highest Price</option>
+      <option value="lowPrice">Lowest Price</option>
+    </select>
+  </motion.div>
+
+  {/* 🧾 Auction Cards */}
+  <motion.div
+    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.5, duration: 0.6 }}
+  >
+    {filteredAuctions.length > 0 ? (
+      filteredAuctions.map((auction) => (
+        <motion.div
+          key={auction.id}
+          className="p-6 bg-white rounded-lg shadow-md border border-gray-200 group"
+          whileHover={{
+            scale: 1.03,
+            boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <h4 className="text-lg font-semibold text-gray-800 truncate mb-2">
+            {auction.name}
+          </h4>
+          <p className="text-sm text-gray-600 line-clamp-2 mb-4">{auction.description}</p>
+
+          <div className="flex justify-between items-center">
+            <motion.div
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.2 }}
+            >
+              <p className="text-lg font-bold text-green-600">
+                ₹{auction.startingPrice.toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500">
+                Ends: {new Date(auction.endDate).toLocaleString()}
+              </p>
+            </motion.div>
+            <div className="flex gap-3 items-center">
+              <motion.div
+                whileHover={{ scale: 1.2 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                <Link to={`/completed-auction/${auction.id}`}>
+                  <FiEye
+                    size={20}
+                    className="text-gray-500 hover:text-indigo-500 transition duration-150"
+                    title="View Auction"
+                  />
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.2 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                <FiEdit2
+                  size={20}
+                  className="text-gray-500 hover:text-green-500 transition duration-150 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUpdate(auction);
+                  }}
+                  title="Update Auction"
                 />
-                <input
-                  type="number"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  placeholder="Min Price"
-                  className="px-5 py-3 w-full sm:w-52 rounded-2xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.2 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                <FiTrash2
+                  size={20}
+                  className="text-gray-500 hover:text-red-500 transition duration-150 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeletes(auction);
+                  }}
+                  title="Delete Auction"
                 />
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="px-5 py-3 w-full sm:w-60 rounded-2xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all"
-                >
-                  <option value="">Sort By</option>
-                  <option value="startDate">Starting Date</option>
-                  <option value="endDate">Ending Date</option>
-                  <option value="highPrice">Highest Price</option>
-                  <option value="lowPrice">Lowest Price</option>
-                </select>
-              </div>
-        
-              {/* 🧾 Auction Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredAuctions.length > 0 ? (
-                  filteredAuctions.map((auction) => (
-                    <div
-                      key={auction.id}
-                      className="relative group p-6 bg-white/30 border border-white/50 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 hover:scale-[1.02]"
-                    >
-                      <h4 className="text-xl font-bold text-gray-800 mb-2 truncate">
-                        {auction.name}
-                      </h4>
-                      <p className="text-sm text-gray-700 mb-4 line-clamp-2">{auction.description}</p>
-        
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <p className="text-lg font-bold text-green-600">
-                            ₹{auction.startingPrice.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            ⏳ Ends: {new Date(auction.endDate).toLocaleString()}
-                          </p>
-                        </div>
-                        <Link to={`/completed-auction/${auction.id}`}>
-                          <button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm px-4 py-2 rounded-xl hover:scale-105 hover:shadow-lg transition-all">
-                            View
-                          </button>
-                        </Link>
-                      </div>
-        
-                      {/* Light overlay on hover */}
-                      <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-lg text-gray-500 col-span-full">
-                    🚫 No auctions found.
-                  </p>
-                )}
-              </div>
+              </motion.div>
             </div>
+          </div>
+        </motion.div>
+      ))
+    ) : (
+      <motion.p
+        className="text-center text-gray-500 text-lg col-span-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        🚫 No auctions found.
+      </motion.p>
+    )}
+  </motion.div>
+</div>
+
 
 
             );
+            case 'upcomming-auctions':
+            return (
+              <div className="min-h-screen py-12 px-6 bg-gradient-to-br from-blue-100 via-white to-pink-100">
+  <div className="max-w-7xl mx-auto">
+    <h3 className="text-4xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-md">
+      Upcoming Auctions
+    </h3>
+
+    {/* 🔍 Filter Section */}
+    <div className="flex flex-wrap gap-4 mb-10 justify-center items-center">
+      <input
+        type="text"
+        placeholder="🔍 Search by name or ID"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[300px] shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+      />
+      <input
+        type="number"
+        placeholder="💰 Min Price"
+        value={minPrice}
+        onChange={(e) => setMinPrice(e.target.value)}
+        className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all"
+      />
+      <select
+        value={sortOption}
+        onChange={(e) => setSortOption(e.target.value)}
+        className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[200px] shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
+      >
+        <option value="">🔃 Sort By</option>
+        <option value="endDate">📅 Ending Date</option>
+        <option value="highPrice">⬆️ Highest Price</option>
+        <option value="lowPrice">⬇️ Lowest Price</option>
+      </select>
+    </div>
+
+    {/* 🖼️ Auction Cards Grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      {newauction.length > 0 ? (
+        newauction.map((auction) => (
+          <div
+            key={auction.id}
+            className="bg-white/80 backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-1 overflow-hidden"
+          >
+            <h4 className="text-xl font-semibold text-gray-800 mb-2 truncate">
+              🏷️ {auction.name}
+            </h4>
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+              {auction.description}
+            </p>
+
+            <div className="flex justify-between items-end mt-6">
+              <div>
+                <p className="text-xl font-bold text-amber-600">
+                  ₹{auction.startingPrice.toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  ⏱️ {new Date(auction.endDate).toLocaleString()}
+                </p>
+              </div>
+
+              {/* Update & Delete Buttons */}
+              <div className="flex gap-2">
+                <button
+                  title="Update Auction"
+                  className="p-2 bg-green-500 hover:bg-green-600 rounded-full text-white transition"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUpdate(auction);
+                  }}
+                >
+                  <PencilSquareIcon className="h-5 w-5" />
+                </button>
+                <button
+                  title="Delete Auction"
+                  className="p-2 bg-red-500 hover:bg-red-600 rounded-full text-white transition"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeletes(auction);
+                  }}
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-center text-gray-600 text-lg col-span-full">
+          🚫 No auctions found.
+        </p>
+      )}
+    </div>
+  </div>
+</div>
+
+            )
+          
       default:
         return null;
     }
