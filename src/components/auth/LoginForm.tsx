@@ -494,23 +494,18 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const { login } = useAuth();
   const navigate = useNavigate();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
     }
-
     setIsLoading(true);
-
     try {
       // Try user login first
       const userResponse = await fetch('https://metaauction.onrender.com/api/auth/login', {
@@ -553,7 +548,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         localStorage.setItem('adminId', adminData.id);
         localStorage.setItem('adminEmail', adminData.email);
         localStorage.setItem('adminName', adminData.name);
-
+        localStorage.setItem('userData', JSON.stringify(adminData));
         navigate('/admin');
         return;
       }

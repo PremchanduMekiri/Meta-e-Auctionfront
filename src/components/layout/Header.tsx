@@ -77,7 +77,7 @@
 //                 <Link to="/UserProfile" className="block px-4 py-2 text-sm hover:bg-gray-50">Profile</Link>
 //                 <hr />
 //                 <button
-//                   onClick={logout}
+//                   onClick={}
 //                   className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
 //                 >
 //                   Logout
