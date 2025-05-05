@@ -499,7 +499,7 @@ console.log("Current Auctions in the project:-----------------------------------
         return (
           <div className="bg-cyan-50 p-6 md:p-10 rounded-2xl shadow-lg animate__animated animate__fadeIn">
             <h2 className="text-3xl font-extrabold text-gray-800 mb-8 flex items-center gap-2">
-              🏷️ Current Auctions
+               Current Auctions
             </h2>
     
             {/* Filter Controls */}
@@ -516,7 +516,7 @@ console.log("Current Auctions in the project:-----------------------------------
                 type="number"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                placeholder="💰 Min Price"
+                placeholder=" Min Price"
                 className="px-4 py-3 border border-gray-300 rounded-md w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 bg-white"
               />
     
@@ -618,7 +618,7 @@ console.log("Current Auctions in the project:-----------------------------------
             )}
     
             <h3 className="text-3xl font-semibold mb-8 text-center text-gray-800 tracking-tight">
-              🎉 Create New Auction
+               Create New Auction
             </h3>
     
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -753,7 +753,7 @@ console.log("Current Auctions in the project:-----------------------------------
               />
             </div>
     
-            {/* 🧍 User Cards */}
+            {/*  User Cards */}
             <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user, index) => (
@@ -821,7 +821,7 @@ console.log("Current Auctions in the project:-----------------------------------
                       </div>
                     </div>
     
-                    {/* 📄 View Documents Button */}
+                    {/*  View Documents Button */}
                     <div className="pt-6">
                       <Link
                         to={`/VerifingDocuments/${user.id}`}
@@ -860,7 +860,7 @@ console.log("Current Auctions in the project:-----------------------------------
                 />
                 <input
                   type="number"
-                  placeholder="💰 Min Price"
+                  placeholder=" Min Price"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
@@ -877,7 +877,7 @@ console.log("Current Auctions in the project:-----------------------------------
                 </select>
               </div>
     
-              {/* 🖼️ Auction Cards */}
+              {/*  Auction Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                 {end.length > 0 ? (
                   end.map((auction, index) => (
@@ -887,7 +887,7 @@ console.log("Current Auctions in the project:-----------------------------------
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <h4 className="text-xl font-semibold text-gray-800 mb-2 truncate">
-                        🏷️ {auction.name}
+                         {auction.name}
                       </h4>
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {auction.description}
@@ -952,7 +952,7 @@ console.log("Current Auctions in the project:-----------------------------------
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              🎯 Auction Dashboard
+               Auction Dashboard
             </motion.h2>
     
             {/* 🔎 Filter Section */}
@@ -989,7 +989,7 @@ console.log("Current Auctions in the project:-----------------------------------
               </select>
             </motion.div>
     
-            {/* 🧾 Auction Cards */}
+            {/*  Auction Cards */}
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
               initial={{ opacity: 0 }}
@@ -1103,7 +1103,7 @@ console.log("Current Auctions in the project:-----------------------------------
                 />
                 <input
                   type="number"
-                  placeholder="💰 Min Price"
+                  placeholder=" Min Price"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all bg-white"
@@ -1120,7 +1120,7 @@ console.log("Current Auctions in the project:-----------------------------------
                 </select>
               </div>
     
-              {/* 🖼️ Auction Cards Grid */}
+              {/*  Auction Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                 {newauction.length > 0 ? (
                   newauction.map((auction, index) => (
@@ -1130,7 +1130,7 @@ console.log("Current Auctions in the project:-----------------------------------
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <h4 className="text-xl font-semibold text-gray-800 mb-2 truncate">
-                        🏷️ {auction.name}
+                         {auction.name}
                       </h4>
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {auction.description}
