@@ -534,6 +534,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           navigate('/DocumentVerificationForm');
         } else {
           navigate('/');
+          window.location.reload();
         }
         return;
       }

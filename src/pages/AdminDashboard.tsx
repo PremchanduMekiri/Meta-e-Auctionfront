@@ -58,78 +58,43 @@ const [successMessage, setSuccessMessage] = useState('');
 const handleTabChange = (tab: string) => {
   setActiveTab(tab);
 };
-const formatToIST = (dateString: string) => {
-  const date = new Date(dateString);
-  
-  // Ensure the date is valid
-  if (isNaN(date.getTime())) {
-    console.error("Invalid date:", dateString);
-    return null;  // Return null if the date is invalid
-  }
 
-  // Convert the date to IST (UTC +5:30)
-  const istOffset = 5.5 * 60;  // IST offset in minutes
-  const localOffset = date.getTimezoneOffset();  // Local time zone offset in minutes
 
-  // Adjust the date to IST
-  date.setMinutes(date.getMinutes() + localOffset + istOffset);
-
-  return date;
-};
-
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+const handleInputChange = (e) => {
   const { name, value } = e.target;
-
-  // Store the value as a string for date fields
-  setAuctionData((prevState) => ({
-    ...prevState,
-    [name]: value,
-  }));
+  setAuctionData({ ...auctionData, [name]: value });
 };
-
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
+  setIsSubmitting(true);
   setErrorMessage('');
   setSuccessMessage('');
 
-  // Validate the form fields
-  if (!auctionData.name || !auctionData.description || !auctionData.startingPrice || !auctionData.startDate || !auctionData.endDate) {
-    setErrorMessage('Please fill in all required fields.');
-    return;
-  }
-
-  // Convert start and end date to IST
-  const startDateIST = formatToIST(auctionData.startDate);
-  const endDateIST = formatToIST(auctionData.endDate);
-
-  if (!startDateIST || !endDateIST) {
-    setErrorMessage('Invalid date provided.');
-    return;
-  }
-
-  // Format the auction data for submission
-  const formattedAuctionData = {
-    ...auctionData,
-    startDate: startDateIST.toISOString(),  // Convert to ISO string
-    endDate: endDateIST.toISOString(),  // Convert to ISO string
-  };
-
-  console.log('Formatted Auction Data:', formattedAuctionData);
-
-  setIsSubmitting(true);
-
   try {
-    // Send the data to the API
-    const response = await axios.post('https://metaauction.onrender.com/admin/inserting/auction', formattedAuctionData);
-    
-    setSuccessMessage('Auction created successfully!');
-    console.log('Auction Created:', response.data);
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      setErrorMessage('Failed to create auction: ' + error.response.data.message);
+    const response = await fetch('https://metaauction.onrender.com/admin/inserting/auction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(auctionData),
+    });
+
+    if (response.ok) {
+      setSuccessMessage('Auction created successfully!');
+      setAuctionData({
+        name: '',
+        description: '',
+        startingPrice: '',
+        startDate: '',
+        endDate: '',
+      });
+      window.location.reload();
     } else {
-      setErrorMessage('An unexpected error occurred.');
+      const errorData = await response.json();
+      setErrorMessage(errorData.message || 'Failed to create auction.');
     }
+  } catch (error) {
+    setErrorMessage('An error occurred while submitting the form.');
   } finally {
     setIsSubmitting(false);
   }

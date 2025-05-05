@@ -43,6 +43,12 @@ const HomePage: React.FC = () => {
   
 
 
+   // Replace with your upcoming auctions data
+  
+    useEffect(() => {
+      // Page reload animation
+      document.body.classList.add('animate__animated', 'animate__fadeIn');
+    }, []);
   
   const faqItems = [
     {
@@ -169,17 +175,21 @@ useEffect(() => {
     <Layout>
       {/* Hero Section */}
      {/* Hero Section */}
-     <section className="bg-gradient-to-br from-blue-800 to-blue-800 text-white overflow-hidden">
+     <section className="bg-gradient-to-br from-[#2F3B52] to-[#4F6D7A] text-white overflow-hidden animate__animated animate__fadeIn">
   <div className="container mx-auto px-4 py-12">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
 
-      {/* Left Side - Centered Image */}
-      <div className="flex justify-center items-center">
+      {/* Left Side - Title Above Image */}
+      <div className="flex flex-col items-center">
+        {/* Title Above the Image */}
+        <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-[0_4px_12px_rgba(0,123,255,0.6)]">
+  META E AUCTION
+</h1>
         <div className="relative w-full max-w-md h-[350px] rounded-2xl overflow-hidden">
           <img 
             src="/image2.png" 
             alt="Industrial Scrap" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent" />
         </div>
@@ -190,30 +200,30 @@ useEffect(() => {
 
         {/* Current Auctions */}
         {currentauctions.length > 0 && (
-          <div className="flex flex-col overflow-hidden bg-white/5 rounded-xl max-h-[300px]">
-            <div className="p-4 border-b border-white/10 bg-blue-900 z-10">
-              <h2 className="text-xl font-bold flex items-center">
+          <div className="flex flex-col overflow-hidden bg-gray-800 rounded-xl max-h-[300px] shadow-lg transition-all duration-500 hover:scale-105">
+            <div className="p-4 border-b border-gray-700 bg-gradient-to-r from-[#3A4D70] to-[#5E7A89] z-10">
+              <h2 className="text-xl font-bold flex items-center text-white">
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Current Auctions
               </h2>
             </div>
-            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-800 hover:scrollbar-thumb-blue-300">
+            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-[#F4A261] scrollbar-track-[#2C3E50] hover:scrollbar-thumb-[#E67E22]">
               {currentauctions.map((auction) => (
                 <Link 
                   key={auction.id}
                   to={`/auction/${auction.id}`}
-                  className="block bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-white/20 transition-colors"
+                  className="block bg-gray-700 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-gray-600 transition-colors"
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
-                      <p className="text-base text-black-200">{auction.description}</p>
+                      <p className="text-base text-gray-400">{auction.description}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-amber-400">
+                      <p className="text-lg font-bold text-yellow-400">
                         {formatCurrency(auction.startingPrice)}
                       </p>
-                      <p className="text-sm text-red-900 font-bold">
+                      <p className="text-sm text-red-500 font-bold">
                         {formatTimeRemaining(auction.endDate)}
                       </p>
                     </div>
@@ -226,47 +236,46 @@ useEffect(() => {
 
         {/* Upcoming Auctions */}
         {newauction.length > 0 && (
-  <div className="flex flex-col overflow-hidden bg-white/5 rounded-xl max-h-[300px]">
-    <div className="p-4 border-b border-white/10 bg-blue-900 z-10">
-      <h2 className="text-xl font-bold flex items-center">
-        <TrendingUp className="h-5 w-5 mr-2" />
-        Upcomming Autions
-      </h2>
-    </div>
-    <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-800 hover:scrollbar-thumb-blue-300">
-      {newauction.map((auction) => (
-        <Link
-          key={auction.id}
-          to={{
-            pathname: `/auction/${auction.id}`,
-            state: { auction }  // Passing the auction object as state
-          }}
-          className="block bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-white/20 transition-colors"
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
-              <p className="text-base text-black-200">{auction.description}</p>
+          <div className="flex flex-col overflow-hidden bg-gray-800 rounded-xl max-h-[300px] shadow-lg transition-all duration-500 hover:scale-105">
+            <div className="p-4 border-b border-gray-700 bg-gradient-to-r from-[#5E7A89] to-[#3A4D70] z-10">
+              <h2 className="text-xl font-bold flex items-center text-white">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                Upcoming Auctions
+              </h2>
             </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-amber-400">
-                {formatCurrency(auction.startingPrice)}
-              </p>
-              <p className="text-sm text-red-900 font-bold">
-               Starting : {formatDate(auction.endDate)}
-              </p>
+            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-[#F4A261] scrollbar-track-[#2C3E50] hover:scrollbar-thumb-[#E67E22]">
+              {newauction.map((auction) => (
+                <Link
+                  key={auction.id}
+                  to={{
+                    pathname: `/auction/${auction.id}`,
+                    state: { auction }  // Passing the auction object as state
+                  }}
+                  className="block bg-gray-700 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-gray-600 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
+                      <p className="text-base text-gray-400">{auction.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-yellow-400">
+                        {formatCurrency(auction.startingPrice)}
+                      </p>
+                      <p className="text-sm text-red-500 font-bold">
+                        Starting: {formatDate(auction.endDate)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
-            
           </div>
-        </Link>
-      ))}
-    </div>
-  </div>
-)}
+        )}
 
         {/* No Auctions Message */}
         {currentauctions.length === 0 && newauction.length === 0 && (
-          <div className="bg-white/5 rounded-xl p-6 text-center text-blue-200">
+          <div className="bg-white/5 rounded-xl p-6 text-center text-blue-200 animate__animated animate__fadeIn">
             No current or upcoming auctions available.
           </div>
         )}
@@ -274,6 +283,7 @@ useEffect(() => {
     </div>
   </div>
 </section>
+
 
       {/* Categories Section */}
       <section className="py-12 bg-white">
