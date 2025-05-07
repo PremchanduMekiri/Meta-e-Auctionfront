@@ -2031,113 +2031,114 @@ const HomePage: React.FC = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-teal-800 to-cyan-700 text-white overflow-hidden animate__animated animate__zoomIn">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="flex flex-col items-center animate__animated animate__slideInLeft">
-              <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-[0_4px_12px_rgba(6,182,212,0.6)]">
-                META E AUCTION
-              </h1>
-              <div className="relative w-full max-w-md h-[350px] rounded-2xl overflow-hidden">
-                <img
-                  src="/image2.png"
-                  alt="Industrial Scrap"
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/50 to-transparent" />
-              </div>
+      <section className="bg-gradient-to-br from-blue-200 to-blue-100 text-gray-800 overflow-hidden animate__animated animate__zoomIn">
+  <div className="container mx-auto px-4 py-12">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <div className="flex flex-col items-center animate__animated animate__slideInLeft">
+        <h1 className="text-4xl font-bold text-blue-900 mb-4 drop-shadow-[0_4px_12px_rgba(59,130,246,0.4)]">
+          META E AUCTION
+        </h1>
+        <div className="relative w-full max-w-md h-[350px] rounded-2xl overflow-hidden">
+          <img
+            src="/image2.png"
+            alt="Industrial Scrap"
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-500/30 to-transparent" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4 animate__animated animate__slideInRight">
+        {isLoadingCurrent ? (
+          <div className="flex justify-center items-center bg-white rounded-xl p-6 shadow animate__animated animate__pulse">
+            <Package className="h-7 w-7 text-blue-500 animate-spin" />
+          </div>
+        ) : currentauctions.length > 0 ? (
+          <div className="flex flex-col overflow-hidden bg-white rounded-xl max-h-[300px] shadow-md transition-all duration-500 hover:scale-105">
+            <div className="p-4 border-b border-blue-200 bg-blue-100 z-10">
+              <h2 className="text-xl font-bold flex items-center text-blue-900">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                Current Auctions
+              </h2>
             </div>
-            <div className="flex flex-col gap-4 animate__animated animate__slideInRight">
-              {isLoadingCurrent ? (
-                <div className="flex justify-center items-center bg-gray-900 rounded-xl p-6 animate__animated animate__pulse">
-                  <Package className="h-7 w-7 text-cyan-600 animate-spin" />
-                </div>
-              ) : currentauctions.length > 0 ? (
-                <div className="flex flex-col overflow-hidden bg-gray-900 rounded-xl max-h-[300px] shadow-lg transition-all duration-500 hover:scale-105">
-                  <div className="p-4 border-b border-gray-800 bg-gradient-to-r from-teal-700 to-cyan-600 z-10">
-                    <h2 className="text-xl font-bold flex items-center text-white">
-                      <TrendingUp className="h-5 w-5 mr-2" />
-                      Current Auctions
-                    </h2>
+            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400">
+              {currentauctions.map((auction, index) => (
+                <Link
+                  key={auction.id}
+                  to={`/auction/${auction.id}`}
+                  className="block bg-blue-50 hover:bg-blue-100 backdrop-blur-sm rounded-lg p-4 mb-3 transition-colors animate__animated animate__fadeInUp"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-medium text-blue-900 mb-1">{auction.name}</h3>
+                      <p className="text-base text-gray-700">{auction.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-blue-700">
+                        {formatCurrency(auction.startingPrice)}
+                      </p>
+                      <p className="text-sm text-orange-500 font-bold">
+                        {formatTimeRemaining(auction.endDate)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-cyan-400 scrollbar-track-gray-900 hover:scrollbar-thumb-cyan-500">
-                    {currentauctions.map((auction, index) => (
-                      <Link
-                        key={auction.id}
-                        to={`/auction/${auction.id}`}
-                        className="block bg-gray-800 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-gray-700 transition-colors animate__animated animate__fadeInUp"
-                        style={{ animationDelay: `${index * 0.1}s` }}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
-                            <p className="text-base text-gray-300">{auction.description}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-bold text-cyan-300">
-                              {formatCurrency(auction.startingPrice)}
-                            </p>
-                            <p className="text-sm text-orange-400 font-bold">
-                              {formatTimeRemaining(auction.endDate)}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {isLoadingUpcoming ? (
-                <div className="flex justify-center items-center bg-gray-900 rounded-xl p-6 animate__animated animate__pulse">
-                  <Package className="h-7 w-7 text-cyan-600 animate-spin" />
-                </div>
-              ) : newauction.length > 0 ? (
-                <div className="flex flex-col overflow-hidden bg-gray-900 rounded-xl max-h-[300px] shadow-lg transition-all duration-500 hover:scale-105">
-                  <div className="p-4 border-b border-gray-800 bg-gradient-to-r from-cyan-600 to-teal-700 z-10">
-                    <h2 className="text-xl font-bold flex items-center text-white">
-                      <TrendingUp className="h-5 w-5 mr-2" />
-                      Upcoming Auctions
-                    </h2>
-                  </div>
-                  <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-cyan-400 scrollbar-track-gray-900 hover:scrollbar-thumb-cyan-500">
-                    {newauction.map((auction, index) => (
-                      <Link
-                        key={auction.id}
-                        to={{
-                          pathname: `/auction/${auction.id}`,
-                          state: { auction }
-                        }}
-                        className="block bg-gray-800 backdrop-blur-sm rounded-lg p-4 mb-3 hover:bg-gray-700 transition-colors animate__animated animate__fadeInUp"
-                        style={{ animationDelay: `${index * 0.1}s` }}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-medium text-white mb-1">{auction.name}</h3>
-                            <p className="text-base text-gray-300">{auction.description}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-bold text-cyan-300">
-                              {formatCurrency(auction.startingPrice)}
-                            </p>
-                            <p className="text-sm text-orange-400 font-bold">
-                              Starting: {formatDate(auction.endDate)}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {!isLoadingCurrent && !isLoadingUpcoming && currentauctions.length === 0 && newauction.length === 0 && (
-                <div className="bg-white/10 rounded-xl p-6 text-center text-cyan-200 animate__animated animate__pulse">
-                  No current or upcoming auctions available.
-                </div>
-              )}
+                </Link>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        ) : null}
+
+        {isLoadingUpcoming ? (
+          <div className="flex justify-center items-center bg-white rounded-xl p-6 shadow animate__animated animate__pulse">
+            <Package className="h-7 w-7 text-blue-500 animate-spin" />
+          </div>
+        ) : newauction.length > 0 ? (
+          <div className="flex flex-col overflow-hidden bg-white rounded-xl max-h-[300px] shadow-md transition-all duration-500 hover:scale-105">
+            <div className="p-4 border-b border-blue-200 bg-blue-100 z-10">
+              <h2 className="text-xl font-bold flex items-center text-blue-900">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                Upcoming Auctions
+              </h2>
+            </div>
+            <div className="overflow-y-auto px-4 py-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 hover:scrollbar-thumb-blue-400">
+              {newauction.map((auction, index) => (
+                <Link
+                  key={auction.id}
+                  to={{ pathname: `/auction/${auction.id}`, state: { auction } }}
+                  className="block bg-blue-50 hover:bg-blue-100 backdrop-blur-sm rounded-lg p-4 mb-3 transition-colors animate__animated animate__fadeInUp"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-medium text-blue-900 mb-1">{auction.name}</h3>
+                      <p className="text-base text-gray-700">{auction.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-blue-700">
+                        {formatCurrency(auction.startingPrice)}
+                      </p>
+                      <p className="text-sm text-orange-500 font-bold">
+                        Starting: {formatDate(auction.endDate)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {!isLoadingCurrent && !isLoadingUpcoming && currentauctions.length === 0 && newauction.length === 0 && (
+          <div className="bg-blue-50 rounded-xl p-6 text-center text-blue-700 animate__animated animate__pulse">
+            No current or upcoming auctions available.
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* Categories Section */}
       <section className="py-12 bg-gray-50 animate__animated animate__fadeInUp">

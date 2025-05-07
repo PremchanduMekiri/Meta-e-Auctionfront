@@ -220,7 +220,12 @@ const Header: React.FC = () => {
         to="/"
         className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
       >
-        <Package className="h-7 w-7 text-blue-600" />
+    <img
+          src="/logo.jpg"
+          alt="Meta e-Auction Logo"
+          
+          className="h-20 w-31 font-bold filter brightness-110 contrast-125 border-t-transparent"
+        />
         <span className="text-xl font-bold text-blue-800">Meta e-Auction</span>
       </Link>
 

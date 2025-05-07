@@ -549,7 +549,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         localStorage.setItem('adminEmail', adminData.email);
         localStorage.setItem('adminName', adminData.name);
         localStorage.setItem('userData', JSON.stringify(adminData));
-        navigate('/admin');
+        navigate('/_secure/0x9a8b7c_admin-entry');
         return;
       }
 

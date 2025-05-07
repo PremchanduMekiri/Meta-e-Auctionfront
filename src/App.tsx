@@ -41,7 +41,7 @@ function App() {
             <Route path="/AuctionUserDashboard" element={<AuctionUserDashboard />} />
             <Route path="/UserProfile" element={<UserProfile />} />
             <Route path="/UpdateProfile" element={<UpdateProfile />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/_secure/0x9a8b7c_admin-entry" element={<AdminDashboard />} />
             <Route path="/completed-auction/:id" element={<CompletedAuctionDetailPage />} />
             <Route path="/UpdateAuctionForm" element={<UpdateAuctionForm />} />
             <Route path="/CurrentAuctionDetailPage" element={<CurrentAuctionDetailPage />} />
