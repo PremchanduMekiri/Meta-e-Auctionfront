@@ -2127,6 +2127,7 @@
 // );
 
 // export default CompletedAuctionDetailPage;
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Package, ChevronLeft } from "lucide-react";
@@ -2180,6 +2181,18 @@ const CompletedAuctionDetailPage: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const navigate = useNavigate();
 
+  const [adminData, setAdminData] = useState(null);
+
+    // Check admin data and redirect if not found
+    useEffect(() => {
+        const storedAdminData = localStorage.getItem('userData');
+        if (storedAdminData) {
+            setAdminData(JSON.parse(storedAdminData));
+        } else {
+            navigate('/');
+        }
+    }, [navigate]);
+
   const formatDateTime = (dateString?: string): string => {
     if (!dateString) {
       console.warn("Date string is undefined or null");
@@ -2205,6 +2218,7 @@ const CompletedAuctionDetailPage: React.FC = () => {
     }
   };
 
+  
   const fetchAuctionData = async () => {
     if (!id) {
       setError("No auction ID provided in the URL.");

@@ -60,7 +60,6 @@ const handleTabChange = (tab: string) => {
   setActiveTab(tab);
 };
 
-
 const handleInputChange = (e) => {
   const { name, value } = e.target;
   setAuctionData({ ...auctionData, [name]: value });

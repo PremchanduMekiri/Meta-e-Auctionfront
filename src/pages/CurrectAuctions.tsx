@@ -44,6 +44,8 @@ const CurrentAuctionDetailPage: React.FC = () => {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [selectedBidToReject, setSelectedBidToReject] = useState<Bid | null>(null);
 
+
+  
   useEffect(() => {
     if (!id) return;
 
