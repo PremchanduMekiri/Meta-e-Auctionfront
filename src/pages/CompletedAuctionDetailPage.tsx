@@ -2135,6 +2135,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Package, ChevronLeft } from "lucide-react";
 import Confetti from 'react-confetti';
 
+
 interface Auction {
   id: number;
   name: string;
@@ -2181,7 +2182,25 @@ const CompletedAuctionDetailPage: React.FC = () => {
   const [selectedBidToReject, setSelectedBidToReject] = useState<Bid | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
   const navigate = useNavigate();
+  const [adminData, setAdminData] = useState<any>(null);
+
+  // Check admin data and redirect if not found
+  useEffect(() => {
+    const storedAdminData = localStorage.getItem('userData');
+    if (storedAdminData) {
+      try {
+        const parsedData = JSON.parse(storedAdminData);
+        setAdminData(parsedData);
+      } catch (err) {
+        console.error('Error parsing admin data:', err);
+        navigate('/');
+      }
+    } else {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const [adminData, setAdminData] = useState(null);
 

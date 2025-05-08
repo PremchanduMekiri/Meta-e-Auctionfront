@@ -433,15 +433,16 @@ const VerifyingDocuments = () => {
                     </section>
                 )}
 
-                {message && (
-                    <div className={`p-4 mt-4 rounded-md ${
-                        message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                    }`}>
-                        {message}
-                    </div>
-                )}
+          {/* Message */}
+          {message && (
+            <div className={`p-4 mt-4 rounded-md ${
+              message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            }`}>
+              {message}
             </div>
+          )}
         </div>
+      </div>
     );
 };
 
