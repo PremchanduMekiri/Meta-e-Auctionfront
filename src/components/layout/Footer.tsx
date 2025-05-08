@@ -6,13 +6,18 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <Package className="h-8 w-8 text-blue-400" />
-              <span className="text-xl font-bold text-white">Meta-e-Auction</span>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+  {/* Brand Section */}
+  <div>
+    <div className="flex items-center space-x-2 mb-4">
+      <img
+        src="/logo.jpg"  // ✅ Replace this path with your logo's actual path
+        alt="Meta-e-Auction Logo"
+        className="h-8 w-8"
+      />
+      <span className="text-xl font-bold text-white">Meta-e-Auction</span>
+    </div>
+
             <p className="text-sm mb-4">
               The premier marketplace for scrap material auctions. Connect suppliers with buyers worldwide.
             </p>
