@@ -117,7 +117,11 @@ export const UserProfile: React.FC = () => {
       navigate('/'); // Redirect to the homepage
     } catch (err) {
       // Log detailed error information
-      console.error('Delete error:', err.response || err.message);
+      if (axios.isAxiosError(err)) {
+        console.error('Delete error:', err.response || err.message);
+      } else {
+        console.error('Delete error:', err);
+      }
   
       // Notify the user of the failure
       alert('Failed to delete profile. Please try again later.');

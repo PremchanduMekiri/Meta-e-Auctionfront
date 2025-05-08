@@ -60,7 +60,7 @@ const handleTabChange = (tab: string) => {
   setActiveTab(tab);
 };
 
-const handleInputChange = (e) => {
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   const { name, value } = e.target;
   setAuctionData({ ...auctionData, [name]: value });
 };
