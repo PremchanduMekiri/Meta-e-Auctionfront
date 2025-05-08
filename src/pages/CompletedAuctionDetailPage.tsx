@@ -1,6 +1,5 @@
-// // import React, { useEffect, useState } from "react";
-// // import { useParams } from "react-router-dom";
 
+<<<<<<< HEAD
 // // interface Auction {
 // //   id: number;
 // //   name: string;
@@ -2128,6 +2127,8 @@
 
 // export default CompletedAuctionDetailPage;
 
+=======
+>>>>>>> b6d34e01257385c50e6f8b93daef51b06c01c4e8
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Package, ChevronLeft } from "lucide-react";

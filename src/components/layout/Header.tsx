@@ -204,12 +204,7 @@ const Header: React.FC = () => {
     setAuthModalMode('register');
     setIsAuthModalOpen(true);
   };
-  const simulateLoading = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000); // Simulate loading for 3 seconds
-  };
+ 
   
   return (
     <header className="bg-gradient-to-r from-white via-blue-50 to-white shadow-md sticky top-0 z-50 transition-all duration-200">
