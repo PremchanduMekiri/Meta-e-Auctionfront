@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
   className="h-20 w-20"  // ⬅️ Increased size from h-8 w-8 to h-16 w-16
 />
 
-      <span className="text-xl font-bold text-white">Meta-e-Auction</span>
+      <span className="text-xl font-bold text-white">Meta e-Auction</span>
     </div>
 
             <p className="text-sm mb-4">
