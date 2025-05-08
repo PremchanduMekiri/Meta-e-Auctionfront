@@ -51,16 +51,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
               >
                 Register
               </button>
-              {/* <button
-                className={`flex-1 py-2 text-center ${
-                  mode === 'admin' 
-                    ? 'text-blue-800 border-b-2 border-blue-800 font-medium' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                onClick={() => setMode('admin')}
-              >
-                Admin
-              </button> */}
+            
             </div>
           </div>
           

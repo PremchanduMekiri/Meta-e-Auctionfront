@@ -735,7 +735,7 @@ const AuctionDetailPage: React.FC = () => {
   
       // Store in localStorage
       localStorage.setItem('userAuctionBids', JSON.stringify(res.data));
-      console.log(res.data)
+     
     } catch (err) {
       console.error("Failed to fetch bids for this user:", err);
     }
