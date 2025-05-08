@@ -10,11 +10,12 @@ const Footer: React.FC = () => {
   {/* Brand Section */}
   <div>
     <div className="flex items-center space-x-2 mb-4">
-      <img
-        src="/logo.jpg"  // ✅ Replace this path with your logo's actual path
-        alt="Meta-e-Auction Logo"
-        className="h-8 w-8"
-      />
+    <img
+  src="/logo2.png"
+  alt="Meta-e-Auction Logo"
+  className="h-20 w-20"  // ⬅️ Increased size from h-8 w-8 to h-16 w-16
+/>
+
       <span className="text-xl font-bold text-white">Meta-e-Auction</span>
     </div>
 
