@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -10,7 +8,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import BidForm from '../components/auctions/BidForm';
 import { formatCurrency } from '../utils/formatters';
-import { formatDate, formatTimeRemaining, hasEnded } from '../utils/dateUtils';
+import { formatDate, formatTimeRemaining } from '../utils/dateUtils';
 import axios from 'axios';
 
 type Auction = {
@@ -24,6 +22,7 @@ type Auction = {
   highestBidderId: number | null;
   createdByAdminId: number;
   createdAt: string;
+  image?: string;
   user?: {
     id: number;
     name: string;
@@ -86,28 +85,46 @@ const AuctionDetailPage: React.FC = () => {
     try {
       const res = await axios.get<UserBid[]>(`https://metaauction.onrender.com/bids/getBids/${userId}/${auctionId}`);
       setAuctions(res.data);
-  
-      // Store in localStorage
       localStorage.setItem('userAuctionBids', JSON.stringify(res.data));
-     
     } catch (err) {
       console.error("Failed to fetch bids for this user:", err);
     }
   };
-  
 
-  useEffect(() => {
-    if (!auction) return;
+useEffect(() => {
+  if (!auction) return;
 
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      fetchBidsForAuction(userId, auction.id);
+  const userId = localStorage.getItem('userId');
+  if (userId) {
+    fetchBidsForAuction(userId, auction.id);
+  }
+
+  const endTime = new Date(auction.endDate).getTime();
+
+  const updateTime = () => {
+    const now = Date.now();
+    const diff = endTime - now;
+
+    if (diff <= 0) {
+      setTimeRemaining('');
+      return;
     }
 
-    setTimeRemaining(formatTimeRemaining(auction.endDate));
-  }, [auction]);
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-  
+    setTimeRemaining(
+      `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    );
+  };
+
+  updateTime(); // Initial call
+  const interval = setInterval(updateTime, 1000);
+
+  return () => clearInterval(interval); // Cleanup
+}, [auction]);
+
 
   if (loading) {
     return (
@@ -131,8 +148,8 @@ const AuctionDetailPage: React.FC = () => {
     );
   }
 
-  const auctionEnded = hasEnded(formatDate(auction.endDate));
-  const defaultImage = '/image1.png';
+  const auctionEnded = timeRemaining === '';
+  const defaultImage = '/scrap.jpg';
   const auctionImage = auction.image || defaultImage;
 
   return (
@@ -150,7 +167,7 @@ const AuctionDetailPage: React.FC = () => {
                 <img
                   src={auctionImage}
                   alt={auction.name}
-                  className="w-full max-w-5xl object-contain rounded-lg shadow-md border-4 border-gray-200 h-300 mx-auto"
+                  className="w-full max-w-5xl object-contain rounded-lg shadow-md border-4 border-gray-250 h-300 mx-auto"
                 />
                 {auctionEnded && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -208,7 +225,7 @@ const AuctionDetailPage: React.FC = () => {
             </Card>
           </div>
 
-          {/* Right Column - Bidding */}
+          {/* Right Column - Bidding */ }
           <div>
             <Card className="mb-6" padding="lg">
               <div className="flex flex-col">
@@ -228,7 +245,9 @@ const AuctionDetailPage: React.FC = () => {
                   <Clock className="h-5 w-5 text-amber-600 mr-2" />
                   <div>
                     <p className="text-sm text-gray-500">Time Remaining:</p>
-                    <p className={`font-medium ${auctionEnded ? 'text-red-600' : 'text-amber-600'}`}>{timeRemaining}</p>
+                    <p className={`font-medium ${auctionEnded ? 'red' : 'text-amber-600'}`}>
+                      {auctionEnded ? 'Auction Ended' : timeRemaining}
+                    </p>
                   </div>
                 </div>
                 <div className="text-sm text-gray-500">
@@ -247,7 +266,6 @@ const AuctionDetailPage: React.FC = () => {
                 auctionName={auction.name}
                 auctionDescription={auction.description}
                 auctionStatus={auction.status}
-               
               />
             )}
           </div>
@@ -258,4 +276,3 @@ const AuctionDetailPage: React.FC = () => {
 };
 
 export default AuctionDetailPage;
-
