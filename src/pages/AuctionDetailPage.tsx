@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -153,9 +154,14 @@ const AuctionDetailPage: React.FC = () => {
   const auctionEnded = timeRemaining === '';
   const defaultImage = '/scrap.jpg';
   const auctionImage = auction.image || defaultImage;
-  // Normalize bidStatus for comparison
+  // Determine hasAutoBid and bidStatus from auctions
   const hasAutoBid = auctions.some(bid => bid.bidStatus?.toLowerCase() === 'auto');
-  console.log('hasAutoBid calculation:', { auctions, hasAutoBid }); // Debug hasAutoBid
+  // Get the most relevant bid status (prioritize 'auto', 'accepted', 'rejected', or the latest bid status)
+  const bidStatus = auctions.length > 0
+    ? auctions.find(bid => bid.bidStatus?.toLowerCase() === 'auto')?.bidStatus ||
+      auctions[auctions.length - 1].bidStatus // Use the latest bid status if no auto-bid
+    : undefined;
+  console.log('Bid status calculation:', { auctions, hasAutoBid, bidStatus });
 
   return (
     <Layout>
@@ -264,14 +270,15 @@ const AuctionDetailPage: React.FC = () => {
 
             {!auctionEnded && (
               <BidForm
-                auctionId={auction.id}
+                auctionId={auction.id.toString()}
                 currentBid={auction.startingPrice}
                 endDate={auction.endDate}
                 startDate={auction.startDate}
                 auctionName={auction.name}
                 auctionDescription={auction.description}
                 auctionStatus={auction.status}
-                hasAutoBid={hasAutoBid} // Pass the new prop
+                hasAutoBid={hasAutoBid}
+                bidStatus={bidStatus} // New prop
               />
             )}
           </div>

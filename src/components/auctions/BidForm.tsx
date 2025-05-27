@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -17,6 +18,7 @@ interface BidFormProps {
   auctionDescription?: string;
   auctionStatus?: string;
   hasAutoBid?: boolean;
+  bidStatus?: string; // New prop
 }
 
 const BidForm: React.FC<BidFormProps> = ({
@@ -29,6 +31,7 @@ const BidForm: React.FC<BidFormProps> = ({
   auctionDescription,
   auctionStatus,
   hasAutoBid = false,
+  bidStatus,
 }) => {
   const { user, isAuthenticated } = useAuth();
   const { placeBid } = useAuctions();
@@ -183,7 +186,7 @@ const BidForm: React.FC<BidFormProps> = ({
         riseAmt: autoHike,
       };
 
-      console.log('Auto-bid setup payload:', payload); // Debug payload
+      console.log('Auto-bid setup payload:', payload);
 
       const response = await axios.post(
         'https://metaauction.onrender.com/bids/auto-bid/setup',
@@ -195,7 +198,6 @@ const BidForm: React.FC<BidFormProps> = ({
 
       if (response.status === 200 || response.status === 201) {
         setSuccess('Your auto-bid settings were saved successfully!');
-        // Re-fetch auto-bid to ensure state is up-to-date
         const res = await axios.get(
           `http://localhost:8080/bids/auto-bid/${users.id}/${auctionId}`,
           { withCredentials: true }
@@ -256,7 +258,7 @@ const BidForm: React.FC<BidFormProps> = ({
         riseAmt: autoHike,
       };
 
-      console.log('Auto-bid update payload:', payload); // Debug payload
+      console.log('Auto-bid update payload:', payload);
 
       const response = await axios.post(
         'http://localhost:8080/bids/update/auto-bid',
@@ -292,7 +294,18 @@ const BidForm: React.FC<BidFormProps> = ({
     );
   }
 
-  const isAutoBidActive = autobid?.status === 'auto' || hasAutoBid;
+  // If bidStatus is 'accepted' or 'rejected', show message and hide all forms
+  if (bidStatus?.toLowerCase() === 'accepted' || bidStatus?.toLowerCase() === 'rejected') {
+    return (
+      <div className="bg-gray-100 p-4 rounded-lg text-center">
+        <p className="text-gray-700">
+          Your bid status ({bidStatus}) does not allow further bidding.
+        </p>
+      </div>
+    );
+  }
+
+  const isAutoBidActive = hasAutoBid || autobid?.status?.toLowerCase() === 'auto';
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
@@ -325,124 +338,124 @@ const BidForm: React.FC<BidFormProps> = ({
         <p className="text-xl font-bold text-blue-800">{formatCurrency(currentBid)}</p>
       </div>
 
-      <form onSubmit={handleBidSubmit}>
-        <div className="mb-4">
-          <Input
-            label="Your Bid Amount"
-            type="number"
-            value={bidAmount}
-            onChange={(e) => setBidAmount(Number(e.target.value))}
-            min={currentBid + 1}
-            step="1"
-            required
-            disabled={isLoading || !isAuthenticated || users?.status !== 'verified'}
-          />
-        </div>
-
-        <div className="mb-4">
-          <p className="text-gray-600 mb-2">Suggested Bids:</p>
-          <div className="grid grid-cols-3 gap-2">
-            {bidSuggestions.map((suggestedBid, index) => (
-              <Button
-                key={index}
-                type="button"
-                variant="outline"
-                onClick={() => setBidAmount(suggestedBid)}
-              >
-                {formatCurrency(suggestedBid)}
-              </Button>
-            ))}
+      {/* Show Place Bid form only if auto-bid is not active */}
+      {!isAutoBidActive && (
+        <form onSubmit={handleBidSubmit}>
+          <div className="mb-4">
+            <Input
+              label="Your Bid Amount"
+              type="number"
+              value={bidAmount}
+              onChange={(e) => setBidAmount(Number(e.target.value))}
+              min={currentBid + 1}
+              step="1"
+              required
+              disabled={isLoading || !isAuthenticated || users?.status !== 'verified'}
+            />
           </div>
-        </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          fullWidth
-          isLoading={isLoading}
-          disabled={!isAuthenticated || users?.status !== 'verified'}
-          className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
-        >
-          Place Bid
-        </Button>
-      </form>
+          <div className="mb-4">
+            <p className="text-gray-600 mb-2">Suggested Bids:</p>
+            <div className="grid grid-cols-3 gap-2">
+              {bidSuggestions.map((suggestedBid, index) => (
+                <Button
+                  key={index}
+                  type="button"
+                  variant="outline"
+                  onClick={() => setBidAmount(suggestedBid)}
+                >
+                  {formatCurrency(suggestedBid)}
+                </Button>
+              ))}
+            </div>
+          </div>
 
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth
+            isLoading={isLoading}
+            disabled={!isAuthenticated || users?.status !== 'verified'}
+            className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
+          >
+            Place Bid
+          </Button>
+        </form>
+      )}
+
+      {/* Show Auto Bid or Update Auto Bid form based on isAutoBidActive */}
       {auctionStarted && (
         <div className="mt-8 pt-6 border-t border-gray-200">
           {isAutoBidActive ? (
-            <>
+            <form onSubmit={handleAutoBidUpdate}>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Auto Bid Settings</h3>
-              <form onSubmit={handleAutoBidUpdate}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <Input
-                    label="Max Amount"
-                    type="number"
-                    value={autoMax}
-                    onChange={(e) => setAutoMax(Number(e.target.value))}
-                    min={currentBid + 1}
-                    step="1"
-                    required
-                  />
-                  <Input
-                    label="Hike Amount"
-                    type="number"
-                    value={autoHike}
-                    onChange={(e) => setAutoHike(Number(e.target.value))}
-                    min={1}
-                    step="1"
-                    required
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <Input
+                  label="Max Amount"
+                  type="number"
+                  value={autoMax}
+                  onChange={(e) => setAutoMax(Number(e.target.value))}
+                  min={currentBid + 1}
+                  step="1"
+                  required
+                />
+                <Input
+                  label="Hike Amount"
+                  type="number"
+                  value={autoHike}
+                  onChange={(e) => setAutoHike(Number(e.target.value))}
+                  min={1}
+                  step="1"
+                  required
+                />
+              </div>
 
-                <Button
-                  type="submit"
-                  variant="primary"
-                  fullWidth
-                  isLoading={isLoading}
-                  disabled={!isAuthenticated || users?.status !== 'verified'}
-                  className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
-                >
-                  Update Auto Bid
-                </Button>
-              </form>
-            </>
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                isLoading={isLoading}
+                disabled={!isAuthenticated || users?.status !== 'verified'}
+                className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
+              >
+                Update Auto Bid
+              </Button>
+            </form>
           ) : (
-            <>
+            <form onSubmit={handleAutoBidSetup}>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Automate Your Bidding</h3>
-              <form onSubmit={handleAutoBidSetup}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <Input
-                    label="Max Amount"
-                    type="number"
-                    value={autoMax}
-                    onChange={(e) => setAutoMax(Number(e.target.value))}
-                    min={currentBid + 1}
-                    step="1"
-                    required
-                  />
-                  <Input
-                    label="Hike Amount"
-                    type="number"
-                    value={autoHike}
-                    onChange={(e) => setAutoHike(Number(e.target.value))}
-                    min={1}
-                    step="1"
-                    required
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <Input
+                  label="Max Amount"
+                  type="number"
+                  value={autoMax}
+                  onChange={(e) => setAutoMax(Number(e.target.value))}
+                  min={currentBid + 1}
+                  step="1"
+                  required
+                />
+                <Input
+                  label="Hike Amount"
+                  type="number"
+                  value={autoHike}
+                  onChange={(e) => setAutoHike(Number(e.target.value))}
+                  min={1}
+                  step="1"
+                  required
+                />
+              </div>
 
-                <Button
-                  type="submit"
-                  variant="primary"
-                  fullWidth
-                  isLoading={isLoading}
-                  disabled={!isAuthenticated || users?.status !== 'verified'}
-                  className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
-                >
-                  Automate my Bid
-                </Button>
-              </form>
-            </>
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                isLoading={isLoading}
+                disabled={!isAuthenticated || users?.status !== 'verified'}
+                className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
+              >
+                Automate my Bid
+              </Button>
+            </form>
           )}
         </div>
       )}
