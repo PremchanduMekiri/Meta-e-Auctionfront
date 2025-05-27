@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
   <div>
     <div className="flex items-center space-x-2 mb-4">
     <img
-  src="/logo2.png"
+  src="/logo.png"
   alt="Meta-e-Auction Logo"
   className="h-20 w-20"  // ⬅️ Increased size from h-8 w-8 to h-16 w-16
 />

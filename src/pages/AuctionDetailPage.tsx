@@ -84,47 +84,49 @@ const AuctionDetailPage: React.FC = () => {
   const fetchBidsForAuction = async (userId: string, auctionId: number) => {
     try {
       const res = await axios.get<UserBid[]>(`https://metaauction.onrender.com/bids/getBids/${userId}/${auctionId}`);
-      setAuctions(res.data);
-      localStorage.setItem('userAuctionBids', JSON.stringify(res.data));
+      const fetchedBids = res.data;
+      console.log('Fetched bids for auction:', fetchedBids); // Debug bids
+      setAuctions(fetchedBids);
+      localStorage.setItem('userAuctionBids', JSON.stringify(fetchedBids));
     } catch (err) {
       console.error("Failed to fetch bids for this user:", err);
+      setAuctions([]);
     }
   };
 
-useEffect(() => {
-  if (!auction) return;
+  useEffect(() => {
+    if (!auction) return;
 
-  const userId = localStorage.getItem('userId');
-  if (userId) {
-    fetchBidsForAuction(userId, auction.id);
-  }
-
-  const endTime = new Date(auction.endDate).getTime();
-
-  const updateTime = () => {
-    const now = Date.now();
-    const diff = endTime - now;
-
-    if (diff <= 0) {
-      setTimeRemaining('');
-      return;
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      fetchBidsForAuction(userId, auction.id);
     }
 
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    const endTime = new Date(auction.endDate).getTime();
 
-    setTimeRemaining(
-      `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-    );
-  };
+    const updateTime = () => {
+      const now = Date.now();
+      const diff = endTime - now;
 
-  updateTime(); // Initial call
-  const interval = setInterval(updateTime, 1000);
+      if (diff <= 0) {
+        setTimeRemaining('');
+        return;
+      }
 
-  return () => clearInterval(interval); // Cleanup
-}, [auction]);
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+      setTimeRemaining(
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      );
+    };
+
+    updateTime(); // Initial call
+    const interval = setInterval(updateTime, 1000);
+
+    return () => clearInterval(interval); // Cleanup
+  }, [auction]);
 
   if (loading) {
     return (
@@ -151,6 +153,9 @@ useEffect(() => {
   const auctionEnded = timeRemaining === '';
   const defaultImage = '/scrap.jpg';
   const auctionImage = auction.image || defaultImage;
+  // Normalize bidStatus for comparison
+  const hasAutoBid = auctions.some(bid => bid.bidStatus?.toLowerCase() === 'auto');
+  console.log('hasAutoBid calculation:', { auctions, hasAutoBid }); // Debug hasAutoBid
 
   return (
     <Layout>
@@ -225,7 +230,7 @@ useEffect(() => {
             </Card>
           </div>
 
-          {/* Right Column - Bidding */ }
+          {/* Right Column - Bidding */}
           <div>
             <Card className="mb-6" padding="lg">
               <div className="flex flex-col">
@@ -266,6 +271,7 @@ useEffect(() => {
                 auctionName={auction.name}
                 auctionDescription={auction.description}
                 auctionStatus={auction.status}
+                hasAutoBid={hasAutoBid} // Pass the new prop
               />
             )}
           </div>

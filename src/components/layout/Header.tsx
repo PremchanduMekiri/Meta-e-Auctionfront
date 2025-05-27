@@ -216,10 +216,10 @@ const Header: React.FC = () => {
         className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
       >
     <img
-          src="/logo.jpg"
+          src="/logo.png"
           alt="Meta e-Auction Logo"
           
-          className="h-20 w-31 font-bold filter brightness-110 contrast-125 border-t-transparent"
+          className="h-10 w-15 font-bold filter brightness-110 contrast-125 border-t-transparent"
         />
         <span className="text-xl font-bold text-blue-800">Meta e-Auction</span>
       </Link>

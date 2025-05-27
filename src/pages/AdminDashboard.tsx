@@ -579,7 +579,7 @@ const AdminDashboard: React.FC = () => {
                           handleDeletes(auction);
                         }}
                       >
-                        Delete
+                        Disable
                       </button>
                     </div>
                   </motion.div>
@@ -849,7 +849,7 @@ const AdminDashboard: React.FC = () => {
                           className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white text-sm font-medium rounded-md transition-all duration-300"
                         >
                           <TrashIcon className="h-5 w-5" />
-                          Delete
+                          Disable
                         </button>
                       </div>
                     </motion.div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -14,6 +13,10 @@ interface BidFormProps {
   endDate: string;
   startDate: string;
   onSuccess?: () => void;
+  auctionName?: string;
+  auctionDescription?: string;
+  auctionStatus?: string;
+  hasAutoBid?: boolean;
 }
 
 const BidForm: React.FC<BidFormProps> = ({
@@ -21,7 +24,11 @@ const BidForm: React.FC<BidFormProps> = ({
   currentBid,
   endDate,
   startDate,
-  onSuccess
+  onSuccess,
+  auctionName,
+  auctionDescription,
+  auctionStatus,
+  hasAutoBid = false,
 }) => {
   const { user, isAuthenticated } = useAuth();
   const { placeBid } = useAuctions();
@@ -32,7 +39,8 @@ const BidForm: React.FC<BidFormProps> = ({
   const [users, setUsers] = useState<any>(null);
   const [autoMax, setAutoMax] = useState<number>(Math.ceil(currentBid * 1.5));
   const [autoHike, setAutoHike] = useState<number>(Math.ceil(currentBid * 0.05));
-  const [autobid, setAutobid] = useState<any>(null);
+  const [autobid, setAutobid] = useState<any | null>(null);
+  const [maxa, setMaxa] = useState<any>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');
@@ -42,12 +50,25 @@ const BidForm: React.FC<BidFormProps> = ({
   }, []);
 
   useEffect(() => {
-    if (autobid) {
-      console.log("Auto-bid response received:", autobid);
-    }
-  }, [autobid]);
+    const fetchAutoBid = async () => {
+      if (users && auctionId) {
+        try {
+          const res = await axios.get(
+            `http://localhost:8080/bids/auto-bid/${users.id}/${auctionId}`,
+            { withCredentials: true }
+          );
+          setAutobid(res.data);
+          setAutoMax(res.data.maxAmt || Math.ceil(currentBid * 1.5));
+          setAutoHike(res.data.riseAmt || Math.ceil(currentBid * 0.05));
+        } catch (err) {
+          console.warn("No existing auto-bid or error fetching it.");
+          setAutobid(null);
+        }
+      }
+    };
+    fetchAutoBid();
+  }, [users, auctionId, currentBid]);
 
-  const userData = users;
   const bidSuggestions = calculateBidSuggestions(currentBid);
   const auctionEnded = hasEnded(endDate);
   const auctionStarted = new Date() >= new Date(startDate);
@@ -61,22 +82,20 @@ const BidForm: React.FC<BidFormProps> = ({
     hour12: true,
   });
 
-
-  const[maxa,setMaxa]=useState()
   const handleBidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isAuthenticated || !userData) {
+    if (!isAuthenticated || !users) {
       setError('You must be logged in to place a bid');
       return;
     }
 
-    if (userData.status === 'not_uploaded') {
+    if (users.status === 'not_uploaded') {
       setError('Upload your documents to do the bidding');
       return;
     }
 
-    if (userData.status === 'pending') {
+    if (users.status === 'pending') {
       setError('Wait until your documents are verified');
       return;
     }
@@ -99,9 +118,9 @@ const BidForm: React.FC<BidFormProps> = ({
       const payload = {
         auctionId,
         bidAmount,
-        userId: userData.id,
-        username: userData.username,
-        email: userData.email,
+        userId: users.id,
+        username: users.username,
+        email: users.email,
       };
 
       const response = await axios.post(
@@ -109,7 +128,7 @@ const BidForm: React.FC<BidFormProps> = ({
         payload,
         { withCredentials: true }
       );
-      setMaxa(response.data)
+      setMaxa(response.data);
 
       if (response.status === 200) {
         setSuccess(`Your bid of ${formatCurrency(bidAmount)} was successful!`);
@@ -118,36 +137,37 @@ const BidForm: React.FC<BidFormProps> = ({
         setError('Failed to place bid. Please try again.');
       }
     } catch (error: any) {
-      console.error(error);
+      console.error('Bid error:', error);
       const message =
         error.response?.status === 403
           ? 'Unauthorized to bid. Please log in or verify your account.'
-          : 'An error occurred while placing your bid.';
+          : error.response?.data?.message || 'An error occurred while placing your bid.';
       setError(message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(()=>{
-    console.log("maaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",{maxa})
-  })
-
-  const handleAutoBidSettings = async (e: React.FormEvent) => {
+  const handleAutoBidSetup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isAuthenticated || !userData) {
+    if (!isAuthenticated || !users) {
       setError('You must be logged in to schedule auto-bids');
       return;
     }
 
-    if (userData.status !== 'verified') {
+    if (users.status !== 'verified') {
       setError('Your documents must be verified to use auto-bidding');
       return;
     }
 
-    if (autoMax <= currentBid || autoHike <= 0) {
-      setError('Enter a valid Max amount (greater than current bid) and positive hike.');
+    if (autoMax <= currentBid) {
+      setError('Max amount must be greater than the current bid.');
+      return;
+    }
+
+    if (autoHike <= 0) {
+      setError('Hike amount must be positive.');
       return;
     }
 
@@ -158,13 +178,88 @@ const BidForm: React.FC<BidFormProps> = ({
     try {
       const payload = {
         auctionId,
-        userId: userData.id,
+        userId: users.id,
         maxAmt: autoMax,
         riseAmt: autoHike,
       };
 
+      console.log('Auto-bid setup payload:', payload); // Debug payload
+
       const response = await axios.post(
-        `https://metaauction.onrender.com/bids/auto-bid/setup`,
+        'https://metaauction.onrender.com/bids/auto-bid/setup',
+        payload,
+        { withCredentials: true }
+      );
+
+      setAutobid(response.data);
+
+      if (response.status === 200 || response.status === 201) {
+        setSuccess('Your auto-bid settings were saved successfully!');
+        // Re-fetch auto-bid to ensure state is up-to-date
+        const res = await axios.get(
+          `http://localhost:8080/bids/auto-bid/${users.id}/${auctionId}`,
+          { withCredentials: true }
+        );
+        setAutobid(res.data);
+        setAutoMax(res.data.maxAmt || Math.ceil(currentBid * 1.5));
+        setAutoHike(res.data.riseAmt || Math.ceil(currentBid * 0.05));
+      } else {
+        setError('Failed to set up auto-bid. Please try again.');
+      }
+    } catch (err: any) {
+      console.error('Auto-bid setup error:', err.response?.data);
+      const message =
+        err.response?.status === 400 && err.response?.data?.message?.includes('auto-bid already exists')
+          ? 'An auto-bid already exists for this auction. Please use the edit form to update your auto-bid.'
+          : err.response?.data?.message ||
+            (err.response?.status === 403
+              ? 'Unauthorized to set auto-bid. Please check your login or verification status.'
+              : 'An error occurred while setting up auto-bid.');
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAutoBidUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isAuthenticated || !users) {
+      setError('You must be logged in to update auto-bids');
+      return;
+    }
+
+    if (users.status !== 'verified') {
+      setError('Your documents must be verified to use auto-bidding');
+      return;
+    }
+
+    if (autoMax <= currentBid) {
+      setError('Max amount must be greater than the current bid.');
+      return;
+    }
+
+    if (autoHike <= 0) {
+      setError('Hike amount must be positive.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const payload = {
+        auctionId,
+        userId: users.id,
+        maxAmt: autoMax,
+        riseAmt: autoHike,
+      };
+
+      console.log('Auto-bid update payload:', payload); // Debug payload
+
+      const response = await axios.post(
+        'http://localhost:8080/bids/update/auto-bid',
         payload,
         { withCredentials: true }
       );
@@ -172,17 +267,17 @@ const BidForm: React.FC<BidFormProps> = ({
       setAutobid(response.data);
 
       if (response.status === 200) {
-        setSuccess('Your auto-bid settings were saved successfully!');
+        setSuccess('Your auto-bid settings were updated successfully!');
       } else {
-        setError('Failed to schedule auto-bid.');
+        setError('Failed to update auto-bid. Please try again.');
       }
     } catch (err: any) {
-      console.error(err);
+      console.error('Auto-bid update error:', err.response?.data);
       const message =
-        err.response?.data || 
+        err.response?.data?.message ||
         (err.response?.status === 403
-          ? 'Unauthorized to set auto-bid. Please check your login or verification status.'
-          : 'An error occurred while scheduling auto-bid.');
+          ? 'Unauthorized to update auto-bid. Please check your login or verification status.'
+          : 'An error occurred while updating auto-bid.');
       setError(message);
     } finally {
       setIsLoading(false);
@@ -196,6 +291,8 @@ const BidForm: React.FC<BidFormProps> = ({
       </div>
     );
   }
+
+  const isAutoBidActive = autobid?.status === 'auto' || hasAutoBid;
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
@@ -238,7 +335,7 @@ const BidForm: React.FC<BidFormProps> = ({
             min={currentBid + 1}
             step="1"
             required
-            disabled={isLoading || !isAuthenticated || userData?.status !== 'verified'}
+            disabled={isLoading || !isAuthenticated || users?.status !== 'verified'}
           />
         </div>
 
@@ -263,7 +360,7 @@ const BidForm: React.FC<BidFormProps> = ({
           variant="primary"
           fullWidth
           isLoading={isLoading}
-          disabled={!isAuthenticated || userData?.status !== 'verified'}
+          disabled={!isAuthenticated || users?.status !== 'verified'}
           className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
         >
           Place Bid
@@ -272,40 +369,81 @@ const BidForm: React.FC<BidFormProps> = ({
 
       {auctionStarted && (
         <div className="mt-8 pt-6 border-t border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Automate Your Bidding</h3>
-          <form onSubmit={handleAutoBidSettings}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <Input
-                label="Max Amount"
-                type="number"
-                value={autoMax}
-                onChange={(e) => setAutoMax(Number(e.target.value))}
-                min={currentBid + 1}
-                step="1"
-                required
-              />
-              <Input
-                label="Hike Amount"
-                type="number"
-                value={autoHike}
-                onChange={(e) => setAutoHike(Number(e.target.value))}
-                min={1}
-                step="1"
-                required
-              />
-            </div>
+          {isAutoBidActive ? (
+            <>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Auto Bid Settings</h3>
+              <form onSubmit={handleAutoBidUpdate}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    label="Max Amount"
+                    type="number"
+                    value={autoMax}
+                    onChange={(e) => setAutoMax(Number(e.target.value))}
+                    min={currentBid + 1}
+                    step="1"
+                    required
+                  />
+                  <Input
+                    label="Hike Amount"
+                    type="number"
+                    value={autoHike}
+                    onChange={(e) => setAutoHike(Number(e.target.value))}
+                    min={1}
+                    step="1"
+                    required
+                  />
+                </div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
-              isLoading={isLoading}
-              disabled={!isAuthenticated || userData?.status !== 'verified'}
-              className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
-            >
-              Automate my Bid
-            </Button>
-          </form>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  fullWidth
+                  isLoading={isLoading}
+                  disabled={!isAuthenticated || users?.status !== 'verified'}
+                  className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
+                >
+                  Update Auto Bid
+                </Button>
+              </form>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Automate Your Bidding</h3>
+              <form onSubmit={handleAutoBidSetup}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    label="Max Amount"
+                    type="number"
+                    value={autoMax}
+                    onChange={(e) => setAutoMax(Number(e.target.value))}
+                    min={currentBid + 1}
+                    step="1"
+                    required
+                  />
+                  <Input
+                    label="Hike Amount"
+                    type="number"
+                    value={autoHike}
+                    onChange={(e) => setAutoHike(Number(e.target.value))}
+                    min={1}
+                    step="1"
+                    required
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  fullWidth
+                  isLoading={isLoading}
+                  disabled={!isAuthenticated || users?.status !== 'verified'}
+                  className="bg-blue-800 text-white hover:bg-blue-700 focus:ring-blue-600"
+                >
+                  Automate my Bid
+                </Button>
+              </form>
+            </>
+          )}
         </div>
       )}
 
@@ -317,6 +455,3 @@ const BidForm: React.FC<BidFormProps> = ({
 };
 
 export default BidForm;
-
-
-
