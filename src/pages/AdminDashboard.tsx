@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/dashboard/Sidebar';
 import Header from '../components/dashboard/Header';
@@ -9,9 +8,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { FiEye, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { BanIcon } from "lucide-react";
 import Confetti from 'react-confetti';
 
-// Define the User type
+// Define the User and Auction interfaces (unchanged)
 interface User {
   id: string;
   username: string;
@@ -20,7 +20,6 @@ interface User {
   active?: number;
 }
 
-// Define the Auction type (aligned with CompletedAuctionDetailPage)
 interface Auction {
   id: number;
   name: string;
@@ -34,6 +33,7 @@ interface Auction {
   bidId: number | null;
   createdByAdminId: number;
   createdAt: string;
+  active: number; // Ensure active is included
 }
 
 const AdminDashboard: React.FC = () => {
@@ -42,7 +42,7 @@ const AdminDashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Authentication check
+  // Authentication check (unchanged)
   useEffect(() => {
     const adminData = localStorage.getItem('adminId');
     if (!adminData) {
@@ -50,7 +50,7 @@ const AdminDashboard: React.FC = () => {
     }
   }, [navigate]);
 
-  // Stats
+  // Stats (unchanged)
   const [stats] = useState({
     totalAuctions: 24,
     activeAuctions: 5,
@@ -59,7 +59,7 @@ const AdminDashboard: React.FC = () => {
     revenue: '$28,750',
   });
 
-  // Auction form data
+  // Auction form data (unchanged)
   const [auctionData, setAuctionData] = useState({
     name: '',
     description: '',
@@ -78,12 +78,12 @@ const AdminDashboard: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Pagination states
+  // Pagination states (unchanged)
   const [allAuctionsPage, setAllAuctionsPage] = useState(1);
   const [completedAuctionsPage, setCompletedAuctionsPage] = useState(1);
   const [auctionsPerPage] = useState(6);
 
-  // Auction and user states
+  // Auction and user states (unchanged)
   const [allAuctions, setAllAuctions] = useState<Auction[]>([]);
   const [currentAuctions, setCurrentAuctions] = useState<Auction[]>([]);
   const [viewAllUsers, setViewAllUsers] = useState<User[]>([]);
@@ -160,7 +160,6 @@ const AdminDashboard: React.FC = () => {
           createdByAdminId: parseInt(localStorage.getItem('adminId') || '1', 10),
           createdAt: new Date().toISOString(),
         });
-        // Refetch auctions instead of reloading
         await fetchAllAuctions();
         await fetchCurrentAuctions();
         await fetchEndedAuctions();
@@ -180,7 +179,7 @@ const AdminDashboard: React.FC = () => {
   // Fetch all auctions
   const fetchAllAuctions = async () => {
     try {
-      const res = await axios.get('https://metaauction.onrender.com/auction/auctions');
+      const res = await axios.get('https://metaauction.onrender.com/admin/AllAuctions');
       setAllAuctions(res.data);
     } catch (error) {
       console.error('Error fetching auctions:', error);
@@ -240,7 +239,7 @@ const AdminDashboard: React.FC = () => {
     fetchUpcomingAuctions();
   }, []);
 
-  // Handle user status change
+  // Handle user status change (unchanged)
   const handleStatusChange = async (userId: string, newStatus: string) => {
     const confirmed = window.confirm(`Are you sure you want to ${newStatus} this user?`);
     if (!confirmed) return;
@@ -273,44 +272,77 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Handle auction deletion
-  const handleDeletes = async (auction: Auction) => {
-    const confirmed = window.confirm(`Are you sure you want to delete auction "${auction.name}"?`);
-    if (!confirmed) return;
+  // Handle auction enable/disable
+ const handleToggleActive = async (auction: Auction) => {
+  const isDisabling = auction.active === 1;
+  const action = isDisabling ? 'disable' : 'enable';
+  const confirmed = window.confirm(`Are you sure you want to ${action} auction "${auction.name}"?`);
+  if (!confirmed) return;
 
-    try {
-      const response = await axios.delete('https://metaauction.onrender.com/admin/delete/auction', {
+  try {
+    let response;
+    if (isDisabling) {
+      // Disable auction
+      response = await axios.delete('https://metaauction.onrender.com/admin/delete/auction', {
         data: { id: auction.id },
         withCredentials: true,
       });
-      console.log('Auction deleted successfully:', response.data);
-      setAllAuctions((prev) => prev.filter((a) => a.id !== auction.id));
-      setCurrentAuctions((prev) => prev.filter((a) => a.id !== auction.id));
-      setNewAuctions((prev) => prev.filter((a) => a.id !== auction.id));
-      setEnded((prev) => prev.filter((a) => a.id !== auction.id));
-      setSuccessMessage('Auction deleted successfully');
-    } catch (error) {
-      console.error('Error deleting auction:', error);
-      setErrorMessage('Failed to delete auction. Please try again.');
+    } else {
+      // Enable auction
+      response = await axios.put(`https://metaauction.onrender.com/admin/recover/auction/${auction.id}`, {}, {
+        withCredentials: true,
+      });
     }
-  };
 
-  // Handle auction update
+    if (response.status === 200 || response.data === 'Auction soft-deleted successfully' || response.data === 'Auction recovered successfully') {
+      const newActiveStatus = isDisabling ? 0 : 1;
+      // Update auction lists optimistically
+      setAllAuctions((prev) =>
+        prev.map((a) => (a.id === auction.id ? { ...a, active: newActiveStatus } : a))
+      );
+      setCurrentAuctions((prev) =>
+        prev.map((a) => (a.id === auction.id ? { ...a, active: newActiveStatus } : a))
+      );
+      setNewAuctions((prev) =>
+        prev.map((a) => (a.id === auction.id ? { ...a, active: newActiveStatus } : a))
+      );
+      setEnded((prev) =>
+        prev.map((a) => (a.id === auction.id ? { ...a, active: newActiveStatus } : a))
+      );
+
+      setSuccessMessage(`Auction ${action}d successfully`);
+    } else {
+      setErrorMessage(`Unexpected response from server when ${action}ing auction`);
+    }
+  } catch (error) {
+    console.error(`Error ${action}ing auction:`, error);
+    // Extract specific error message from Axios response
+    if (axios.isAxiosError(error) && error.response?.data) {
+      setErrorMessage("con't disable auction because it has existing bids or auto bids"); // e.g., "Cannot delete auction because it has existing bids or auto-bids"
+    } else {
+      setErrorMessage(`Failed to ${action} auction. Please try again.`);
+    }
+    // Clear error message after 5 seconds
+    setTimeout(() => setErrorMessage(''), 5000);
+  }
+};
+
+  // Handle auction update (unchanged)
   const handleUpdate = (auction: Auction) => {
     navigate('/UpdateAuctionForm', { state: { auction } });
   };
 
-  // View auction details
+  // View auction details (unchanged)
   const viewAuction = (auctionId: number) => () => {
     navigate(`/auction-details/${auctionId}`);
   };
 
-  // Handle card click for completed auctions
+  // Handle card click for completed auctions (unchanged)
   const handleCardClick = (auction: Auction) => {
     navigate(`/completed-auction/${auction.id}`);
   };
 
-  // Filtering & Sorting Logic
+  // Filtering & Sorting Logic (unchanged)
   const filterAndSortAuctions = (auctions: Auction[]) => {
     return auctions
       .filter((auction) => {
@@ -348,7 +380,7 @@ const AdminDashboard: React.FC = () => {
       user.id.toString().includes(searchTerm)
   );
 
-  // Pagination Logic
+  // Pagination Logic (unchanged)
   const paginateAuctions = (auctions: Auction[], page: number) => {
     const indexOfLast = page * auctionsPerPage;
     const indexOfFirst = indexOfLast - auctionsPerPage;
@@ -373,7 +405,7 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Render pagination controls
+  // Render pagination controls (unchanged)
   const renderPagination = (currentPage: number, totalPages: number, paginate: (page: number) => void) => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
@@ -509,89 +541,108 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         );
-      case 'current-bids':
-        return (
-          <div className="bg-cyan-50 p-6 md:p-10 rounded-2xl shadow-lg animate_animated animate_fadeIn">
-            <h2 className="text-3xl font-extrabold text-gray-800 mb-8 flex items-center gap-2">Current Auctions</h2>
-            <div className="flex flex-wrap gap-4 mb-8">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="🔍 Search by name or ID"
-                className="px-4 py-3 border border-gray-300 rounded-md w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 bg-white"
-              />
-              <input
-                type="number"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                placeholder=" Min Price"
-                className="px-4 py-3 border border-gray-300 rounded-md w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 bg-white"
-              />
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-md w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 bg-white"
-              >
-                <option value="">Sort By</option>
-                <option value="startDate">Starting Date</option>
-                <option value="endDate">Ending Date</option>
-                <option value="highPrice">Highest Price</option>
-                <option value="lowPrice">Lowest Price</option>
-              </select>
+    case 'current-bids':
+      return (
+        <div className="bg-cyan-50 p-6 md:p-10 rounded-2xl shadow-lg animate_animated animate_fadeIn">
+          {errorMessage && (
+            <div className="bg-red-100 text-red-700 px-4 py-3 rounded-md text-sm shadow-md animate_animated animate_shakeX mb-4">
+              {errorMessage}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 overflow-y-auto max-h-[500px] pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-              {filteredCurrentAuctions.length > 0 ? (
-                filteredCurrentAuctions.map((auction, index) => (
-                  <motion.div
-                    key={auction.id}
-                    className="bg-white border border-cyan-200 p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link to={`/completed-auction/${auction.id}`} className="flex flex-col flex-grow">
-                      <div className="mb-4">
-                        <h3 className="text-xl font-extrabold text-gray-800 mb-1 group-hover:text-cyan-600">{auction.name}</h3>
-                        <p className="text-sm text-gray-600">{auction.description}</p>
-                      </div>
-                      <div className="mt-auto">
-                        <p className="text-lg font-extrabold text-teal-600 mb-1">₹{auction.startingPrice.toFixed(2)}</p>
-                        <p className="text-xs text-gray-600">
-                          Ends: {formatDateTime(auction.endDate)}
-                        </p>
-                      </div>
-                    </Link>
-                    <div className="flex gap-4 mt-6">
-                      <button
-                        className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium rounded-md transition-all duration-300"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpdate(auction);
-                        }}
-                      >
-                        Update
-                      </button>
-                      <button
-                        className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-md transition-all duration-300"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletes(auction);
-                        }}
-                      >
-                        Disable
-                      </button>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <p className="text-center text-lg text-gray-600 col-span-full animate_animated animate_fadeIn">
-                  No current auctions available.
-                </p>
-              )}
-            </div>
+          )}
+          <h2 className="text-3xl font-extrabold text-gray-800 mb-8 flex items-center gap-2">Current Auctions</h2>
+          <div className="flex flex-wrap gap-4 mb-8">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="🔍 Search by name or ID"
+              className="px-4 py-3 border border-gray-300 rounded-md w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 bg-white"
+            />
+            <input
+              type="number"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              placeholder=" Min Price"
+              className="px-4 py-3 border border-gray-300 rounded-md w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 bg-white"
+            />
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="px-4 py-3 border border-gray-300 rounded-md w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 bg-white"
+            >
+              <option value="">Sort By</option>
+              <option value="startDate">Starting Date</option>
+              <option value="endDate">Ending Date</option>
+              <option value="highPrice">Highest Price</option>
+              <option value="lowPrice">Lowest Price</option>
+            </select>
           </div>
-        );
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 overflow-y-auto max-h-[500px] pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+            {filteredCurrentAuctions.length > 0 ? (
+              filteredCurrentAuctions.map((auction, index) => (
+                <motion.div
+                  key={auction.id}
+                  className={`bg-white border p-6 rounded-xl shadow-md transition-all duration-300 group ${
+                    auction.active === 0 ? 'border-gray-300 opacity-60 bg-gray-100' : 'border-cyan-200 hover:shadow-xl hover:scale-105'
+                  }`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <Link to={`/completed-auction/${auction.id}`} className="flex flex-col flex-grow">
+                      <h3 className="text-xl font-extrabold text-gray-800 mb-1 group-hover:text-cyan-600">{auction.name}</h3>
+                      <p className="text-sm text-gray-600">{auction.description}</p>
+                    </Link>
+                    {auction.active === 0 && (
+                      <span className="text-xs font-medium px-3 py-1 rounded-full bg-red-100 text-red-700">
+                        Disabled
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-auto">
+                    <p className="text-lg font-extrabold text-teal-600 mb-1">₹{auction.startingPrice.toFixed(2)}</p>
+                    <p className="text-xs text-gray-600">
+                      Ends: {formatDateTime(auction.endDate)}
+                    </p>
+                  </div>
+                  <div className="flex gap-4 mt-6">
+                    <button
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium rounded-md transition-all duration-300"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpdate(auction);
+                      }}
+                    >
+                      Update
+                    </button>
+                    <button
+                      disabled={auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)}
+                      className={`flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-medium rounded-md transition-all duration-300 ${
+                        auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'hover:from-red-600 hover:to-red-700'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleActive(auction);
+                      }}
+                      title={auction.active === 0 ? 'Enable Auction' : auction.highestBidderId !== null || auction.highestBidAmount !== null ? 'Cannot disable due to existing bids' : 'Disable Auction'}
+                    >
+                      {auction.active === 0 ? 'Enable' : 'Disable'}
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <p className="text-center text-lg text-gray-600 col-span-full animate_animated animate_fadeIn">
+                No current auctions available.
+              </p>
+            )}
+          </div>
+        </div>
+      );
+  
       case 'upload-bid':
         return (
           <div className="bg-cyan-50/90 backdrop-blur-md border border-cyan-200 p-8 sm:p-10 rounded-2xl shadow-2xl mt-10 max-w-3xl mx-auto transition-all duration-500 ease-in-out transform hover:scale-105 animate_animated animate_fadeIn">
@@ -605,7 +656,7 @@ const AdminDashboard: React.FC = () => {
                 className="absolute top-0 left-0 z-50"
               />
             )}
-            <h3 classPeer className="text-3xl font-semibold mb-8 text-center text-gray-800 tracking-tight">Create New Auction</h3>
+            <h3 className="text-3xl font-semibold mb-8 text-center text-gray-800 tracking-tight">Create New Auction</h3>
             <form onSubmit={handleSubmit} className="space-y-6">
               {errorMessage && (
                 <div className="bg-red-100 text-red-700 px-4 py-3 rounded-md text-sm shadow-md animate_animated animate_shakeX">{errorMessage}</div>
@@ -776,287 +827,350 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         );
-      case 'completed-auctions':
-        return (
-          <div className="min-h-screen py-12 px-6 bg-cyan-50 overflow-hidden animate_animated animate_fadeIn">
-            <div className="max-w-7xl mx-auto">
-              <h3 className="text-4xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-md">Completed Auctions</h3>
-              <div className="flex flex-wrap gap-4 mb-10 justify-center items-center">
-                <input
-                  type="text"
-                  placeholder="🔍 Search by name or ID"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[300px] shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white"
-                />
-                <input
-                  type="number"
-                  placeholder=" Min Price"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
-                />
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[200px] shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white"
-                >
-                  <option value="">🔃 Sort By</option>
-                  <option value="endDate">📅 Ending Date</option>
-                  <option value="highPrice">⬆ Highest Price</option>
-                  <option value="lowPrice">⬇ Lowest Price</option>
-                </select>
+   case 'completed-auctions':
+      return (
+        <div className="min-h-screen py-12 px-6 bg-cyan-50 overflow-hidden animate_animated animate_fadeIn">
+          <div className="max-w-7xl mx-auto">
+            {errorMessage && (
+              <div className="bg-red-100 text-red-700 px-4 py-3 rounded-md text-sm shadow-md animate_animated animate_shakeX mb-4">
+                {errorMessage}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {currentCompletedAuctions.length > 0 ? (
-                  currentCompletedAuctions.map((auction, index) => (
-                    <motion.div
-                      key={auction.id}
-                      className="relative bg-white/90 backdrop-blur-lg border border-cyan-200 p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-1 overflow-hidden"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <h4 className="text-xl font-semibold text-gray-800 mb-2 truncate">{auction.name}</h4>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{auction.description}</p>
-                      <div className="flex justify-between items-end mt-6">
-                        <div>
-                          <p className="text-xl font-bold text-teal-600">₹{auction.startingPrice.toFixed(2)}</p>
-                          <p className="text-xs text-gray-600 mt-1">⏱ {formatDateTime(auction.endDate)}</p>
-                        </div>
-                        <Link to={`/completed-auction/${auction.id}`}>
-                          <button className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-md hover:scale-105 hover:shadow-xl transition duration-200">
-                            View →
-                          </button>
-                        </Link>
-                      </div>
-                      <div className="flex justify-end gap-3 mt-6">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleUpdate(auction);
-                          }}
-                          className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white text-sm font-medium rounded-md transition-all duration-300"
-                        >
-                          <PencilSquareIcon className="h-5 w-5" />
-                          Update
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeletes(auction);
-                          }}
-                          className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white text-sm font-medium rounded-md transition-all duration-300"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                          Disable
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-600 text-lg col-span-full animate_animated animate_fadeIn">🚫 No auctions found.</p>
-                )}
-              </div>
-              {totalCompletedAuctionsPages > 1 && renderPagination(completedAuctionsPage, totalCompletedAuctionsPages, paginateCompletedAuctions)}
-            </div>
-          </div>
-        );
-      case 'all-auctions':
-        return (
-          <div className="p-8 bg-gray-50 min-h-screen animate_animated animate_fadeIn">
-            <motion.h2
-              className="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-10 tracking-wide"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              Auction Dashboard
-            </motion.h2>
-            <motion.div
-              className="flex flex-wrap gap-4 justify-center mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
+            )}
+            <h3 className="text-4xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-md">Completed Auctions</h3>
+            <div className="flex flex-wrap gap-4 mb-10 justify-center items-center">
               <input
                 type="text"
+                placeholder="🔍 Search by name or ID"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search auctions..."
-                className="px-4 py-3 w-full sm:w-64 md:w-72 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-cyan-500 focus:outline-none bg-white"
+                className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[300px] shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white"
               />
               <input
                 type="number"
+                placeholder=" Min Price"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                placeholder="Min Price"
-                className="px-4 py-3 w-full sm:w-40 md:w-52 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-teal-500 focus:outline-none bg-white"
+                className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
               />
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
-                className="px-4 py-3 w-full sm:w-48 md:w-60 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-cyan-500 focus:outline-none bg-white"
+                className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[200px] shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white"
               >
-                <option value="">Sort By</option>
-                <option value="startDate">Starting Date</option>
-                <option value="endDate">Ending Date</option>
-                <option value="highPrice">Highest Price</option>
-                <option value="lowPrice">Lowest Price</option>
+                <option value="">🔃 Sort By</option>
+                <option value="endDate">📅 Ending Date</option>
+                <option value="highPrice">⬆ Highest Price</option>
+                <option value="lowPrice">⬇ Lowest Price</option>
               </select>
-            </motion.div>
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-            >
-              {currentAllAuctions.length > 0 ? (
-                currentAllAuctions.map((auction, index) => (
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {currentCompletedAuctions.length > 0 ? (
+                currentCompletedAuctions.map((auction, index) => (
                   <motion.div
                     key={auction.id}
-                    className="p-6 bg-white rounded-lg shadow-md border border-cyan-200 group"
+                    className={`relative bg-white/90 backdrop-blur-lg border p-6 rounded-2xl shadow-xl transition-transform duration-300 overflow-hidden ${
+                      auction.active === 0 ? 'border-gray-300 opacity-60 bg-gray-100' : 'border-cyan-200 hover:shadow-2xl hover:-translate-y-1'
+                    }`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    whileHover={{
-                      scale: 1.03,
-                      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.1)',
-                    }}
                   >
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="text-xl font-semibold text-gray-800 truncate">{auction.name}</h4>
+                      {auction.active === 0 && (
+                        <span className="text-xs font-medium px-3 py-1 rounded-full bg-red-100 text-red-700">
+                          Disabled
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{auction.description}</p>
+                    <div className="flex justify-between items-end mt-6">
+                      <div>
+                        <p className="text-xl font-bold text-teal-600">₹{auction.startingPrice.toFixed(2)}</p>
+                        <p className="text-xs text-gray-600 mt-1">⏱ {formatDateTime(auction.endDate)}</p>
+                      </div>
+                      <Link to={`/completed-auction/${auction.id}`}>
+                        <button className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-md hover:scale-105 hover:shadow-xl transition duration-200">
+                          View →
+                        </button>
+                      </Link>
+                    </div>
+                    <div className="flex justify-end gap-3 mt-6">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdate(auction);
+                        }}
+                        className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white text-sm font-medium rounded-md transition-all duration-300"
+                      >
+                        <PencilSquareIcon className="h-5 w-5" />
+                        Update
+                      </button>
+                      <button
+                        disabled={auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleActive(auction);
+                        }}
+                        className={`flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-medium rounded-md transition-all duration-300 ${
+                          auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'hover:from-red-600 hover:to-red-700'
+                        }`}
+                        title={auction.active === 0 ? 'Enable Auction' : auction.highestBidderId !== null || auction.highestBidAmount !== null ? 'Cannot disable due to existing bids' : 'Disable Auction'}
+                      >
+                        <BanIcon className="h-5 w-5" />
+                        {auction.active === 0 ? 'Enable' : 'Disable'}
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <p className="text-center text-gray-600 text-lg col-span-full animate_animated animate_fadeIn">🚫 No auctions found.</p>
+              )}
+            </div>
+            {totalCompletedAuctionsPages > 1 && renderPagination(completedAuctionsPage, totalCompletedAuctionsPages, paginateCompletedAuctions)}
+          </div>
+        </div>
+      );
+      case 'all-auctions':
+      return (
+        <div className="p-8 bg-gray-50 min-h-screen animate_animated animate_fadeIn">
+          {errorMessage && (
+            <div className="bg-red-100 text-red-700 px-4 py-3 rounded-md text-sm shadow-md animate_animated animate_shakeX mb-4">
+              {errorMessage}
+            </div>
+          )}
+          <motion.h2
+            className="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-10 tracking-wide"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Auction Dashboard
+          </motion.h2>
+          <motion.div
+            className="flex flex-wrap gap-4 justify-center mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search auctions..."
+              className="px-4 py-3 w-full sm:w-64 md:w-72 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-cyan-500 focus:outline-none bg-white"
+            />
+            <input
+              type="number"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              placeholder="Min Price"
+              className="px-4 py-3 w-full sm:w-40 md:w-52 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-teal-500 focus:outline-none bg-white"
+            />
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="px-4 py-3 w-full sm:w-48 md:w-60 rounded-lg border border-gray-300 shadow-sm focus:ring focus:ring-cyan-500 focus:outline-none bg-white"
+            >
+              <option value="">Sort By</option>
+              <option value="startDate">Starting Date</option>
+              <option value="endDate">Ending Date</option>
+              <option value="highPrice">Highest Price</option>
+              <option value="lowPrice">Lowest Price</option>
+            </select>
+          </motion.div>
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+          >
+            {currentAllAuctions.length > 0 ? (
+              currentAllAuctions.map((auction, index) => (
+                <motion.div
+                  key={auction.id}
+                  className={`p-6 bg-white rounded-lg shadow-md border group ${
+                    auction.active === 0 ? 'border-gray-300 opacity-60 bg-gray-100' : 'border-cyan-200'
+                  }`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{
+                    scale: auction.active === 0 ? 1 : 1.03,
+                    boxShadow: auction.active === 0 ? 'none' : '0px 8px 24px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <div className="flex justify-between items-start">
                     <h4 className="text-lg font-semibold text-gray-800 truncate mb-2">{auction.name}</h4>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-4">{auction.description}</p>
-                    <div className="flex justify-between items-center">
-                      <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
-                        <p className="text-lg font-bold text-teal-600">₹{auction.startingPrice.toFixed(2)}</p>
-                        <p className="text-xs text-gray-600">Ends: {formatDateTime(auction.endDate)}</p>
+                    {auction.active === 0 && (
+                      <span className="text-xs font-medium px-3 py-1 rounded-full bg-red-100 text-red-700">
+                        Disabled
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">{auction.description}</p>
+                  <div className="flex justify-between items-center">
+                    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+                      <p className="text-lg font-bold text-teal-600">₹{auction.startingPrice.toFixed(2)}</p>
+                      <p className="text-xs text-gray-600">Ends: {formatDateTime(auction.endDate)}</p>
+                    </motion.div>
+                    <div className="flex gap-3 items-center">
+                      <motion.div whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 200 }}>
+                        <Link to={`/completed-auction/${auction.id}`}>
+                          <FiEye
+                            size={20}
+                            className="text-gray-600 hover:text-cyan-500 transition duration-150"
+                            title="View Auction"
+                          />
+                        </Link>
                       </motion.div>
-                      <div className="flex gap-3 items-center">
-                        <motion.div whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 200 }}>
-                          <Link to={`/completed-auction/${auction.id}`}>
-                            <FiEye size={20} className="text-gray-600 hover:text-cyan-500 transition duration-150" title="View Auction" />
-                          </Link>
-                        </motion.div>
-                        <motion.div whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 200 }}>
-                          <FiEdit2
-                            size={20}
-                            className="text-gray-600 hover:text-green-500 transition duration-150 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleUpdate(auction);
-                            }}
-                            title="Update Auction"
-                          />
-                        </motion.div>
-                        <motion.div whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 200 }}>
-                          <FiTrash2
-                            size={20}
-                            className="text-gray-600 hover:text-red-500 transition duration-150 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeletes(auction);
-                            }}
-                            title="Delete Auction"
-                          />
-                        </motion.div>
+                      <motion.div whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 200 }}>
+                        <FiEdit2
+                          size={20}
+                          className="text-gray-600 hover:text-green-500 transition duration-150 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdate(auction);
+                          }}
+                          title="Update Auction"
+                        />
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 200 }}>
+                        <button
+                          disabled={auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleActive(auction);
+                          }}
+                          className={`text-gray-600 transition duration-150 ${
+                            auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)
+                              ? 'opacity-50 cursor-not-allowed'
+                              : 'hover:text-red-500'
+                          }`}
+                          title={auction.active === 0 ? 'Enable Auction' : auction.highestBidderId !== null || auction.highestBidAmount !== null ? 'Cannot disable due to existing bids' : 'Disable Auction'}
+                        >
+                          <BanIcon size={20} />
+                        </button>
+                      </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <motion.p
+                className="text-center text-gray-600 text-lg col-span-full animate_animated animate_fadeIn"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                🚫 No auctions found.
+              </motion.p>
+            )}
+          </motion.div>
+          {totalAllAuctionsPages > 1 && renderPagination(allAuctionsPage, totalAllAuctionsPages, paginateAllAuctions)}
+        </div>
+      );
+   case 'upcomming-auctions':
+      return (
+        <div className="min-h-screen py-12 px-6 bg-teal-50 animate_animated animate_fadeIn">
+          <div className="max-w-7xl mx-auto">
+            {errorMessage && (
+              <div className="bg-red-100 text-red-700 px-4 py-3 rounded-md text-sm shadow-md animate_animated animate_shakeX mb-4">
+                {errorMessage}
+              </div>
+            )}
+            <h3 className="text-4xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-md">Upcoming Auctions</h3>
+            <div className="flex flex-wrap gap-4 mb-10 justify-center items-center">
+              <input
+                type="text"
+                placeholder="🔍 Search by name or ID"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[300px] shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all bg-white"
+              />
+              <input
+                type="number"
+                placeholder=" Min Price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all bg-white"
+              />
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[200px] shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all bg-white"
+              >
+                <option value="">🔃 Sort By</option>
+                <option value="endDate">📅 Ending Date</option>
+                <option value="highPrice">⬆ Highest Price</option>
+                <option value="lowPrice">⬇ Lowest Price</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {filteredNewAuctions.length > 0 ? (
+                filteredNewAuctions.map((auction, index) => (
+                  <motion.div
+                    key={auction.id}
+                    className={`bg-white/90 backdrop-blur-xl border p-6 rounded-2xl shadow-lg transition-transform duration-300 overflow-hidden ${
+                      auction.active === 0 ? 'border-gray-300 opacity-60 bg-gray-100' : 'border-teal-200 hover:shadow-2xl hover:-translate-y-1'
+                    }`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="text-xl font-semibold text-gray-800 truncate">{auction.name}</h4>
+                      {auction.active === 0 && (
+                        <span className="text-xs font-medium px-3 py-1 rounded-full bg-red-100 text-red-700">
+                          Disabled
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{auction.description}</p>
+                    <div className="flex justify-between items-end mt-6">
+                      <div>
+                        <p className="text-xl font-bold text-teal-600">₹{auction.startingPrice.toFixed(2)}</p>
+                        <p className="text-xs text-gray-600 mt-1">⏱ {formatDateTime(auction.endDate)}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          title="Update Auction"
+                          className="p-2 bg-green-500 hover:bg-green-600 rounded-full text-white transition"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdate(auction);
+                          }}
+                        >
+                          <PencilSquareIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          disabled={auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)}
+                          title={auction.active === 0 ? 'Enable Auction' : auction.highestBidderId !== null || auction.highestBidAmount !== null ? 'Cannot disable due to existing bids' : 'Disable Auction'}
+                          className={`p-2 bg-red-500 rounded-full text-white transition ${
+                            auction.active === 1 && (auction.highestBidderId !== null || auction.highestBidAmount !== null)
+                              ? 'opacity-50 cursor-not-allowed'
+                              : 'hover:bg-red-600'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleActive(auction);
+                          }}
+                        >
+                          <BanIcon className="h-5 w-5" />
+                        </button>
                       </div>
                     </div>
                   </motion.div>
                 ))
               ) : (
-                <motion.p
-                  className="text-center text-gray-600 text-lg col-span-full animate_animated animate_fadeIn"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  🚫 No auctions found.
-                </motion.p>
+                <p className="text-center text-gray-600 text-lg col-span-full animate_animated animate_fadeIn">🚫 No auctions found.</p>
               )}
-            </motion.div>
-            {totalAllAuctionsPages > 1 && renderPagination(allAuctionsPage, totalAllAuctionsPages, paginateAllAuctions)}
-          </div>
-        );
-      case 'upcomming-auctions':
-        return (
-          <div className="min-h-screen py-12 px-6 bg-teal-50 animate_animated animate_fadeIn">
-            <div className="max-w-7xl mx-auto">
-              <h3 className="text-4xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-md">Upcoming Auctions</h3>
-              <div className="flex flex-wrap gap-4 mb-10 justify-center items-center">
-                <input
-                  type="text"
-                  placeholder="🔍 Search by name or ID"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[300px] shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all bg-white"
-                />
-                <input
-                  type="number"
-                  placeholder=" Min Price"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[180px] shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all bg-white"
-                />
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="px-5 py-3 border border-gray-300 rounded-xl w-full sm:w-[200px] shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all bg-white"
-                >
-                  <option value="">🔃 Sort By</option>
-                  <option value="endDate">📅 Ending Date</option>
-                  <option value="highPrice">⬆ Highest Price</option>
-                  <option value="lowPrice">⬇ Lowest Price</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {filteredNewAuctions.length > 0 ? (
-                  filteredNewAuctions.map((auction, index) => (
-                    <motion.div
-                      key={auction.id}
-                      className="bg-white/90 backdrop-blur-xl border border-teal-200 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:-translate-y-1 overflow-hidden"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <h4 className="text-xl font-semibold text-gray-800 mb-2 truncate">{auction.name}</h4>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{auction.description}</p>
-                      <div className="flex justify-between items-end mt-6">
-                        <div>
-                          <p className="text-xl font-bold text-teal-600">₹{auction.startingPrice.toFixed(2)}</p>
-                          <p className="text-xs text-gray-600 mt-1">⏱ {formatDateTime(auction.endDate)}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            title="Update Auction"
-                            className="p-2 bg-green-500 hover:bg-green-600 rounded-full text-white transition"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleUpdate(auction);
-                            }}
-                          >
-                            <PencilSquareIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            title="Delete Auction"
-                            className="p-2 bg-red-500 hover:bg-red-600 rounded-full text-white transition"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeletes(auction);
-                            }}
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-600 text-lg col-span-full animate_animated animate_fadeIn">🚫 No auctions found.</p>
-                )}
-              </div>
             </div>
           </div>
-        );
+        </div>
+      );
       default:
         return null;
     }
