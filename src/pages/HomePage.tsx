@@ -542,8 +542,8 @@ const HomePage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 {[
-                  { icon: <Mail className="h-6 w-6 text-cyan-600 mt-1" />, title: "Email", content: "info@metaebid.com" },
-                  { icon: <Phone className="h-6 w-6 text-cyan-600 mt-1" />, title: "Phone", content: "+1 (555) 123-4567" },
+                  { icon: <Mail className="h-6 w-6 text-cyan-600 mt-1" />, title: "Email", content: "iirshadkhan060890@gmail.com" },
+                  { icon: <Phone className="h-6 w-6 text-cyan-600 mt-1" />, title: "Phone", content: "+91 9540832382" },
                   {
                     icon: <MapPin className="h-6 w-6 text-cyan-600 mt-1" />,
                     title: "Address",

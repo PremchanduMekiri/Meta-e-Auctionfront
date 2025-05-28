@@ -97,11 +97,11 @@ SAKINAKA, MUMBAI, Mumbai, Maharashtra, 400072
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-blue-400 mr-2" />
-                <span>+91 **********</span>
+                <span>+91 9540832382</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-blue-400 mr-2" />
-                <span>info@MetaEbid.com</span>
+                <span>irshadkhan060890@gmail.com</span>
               </li>
             </ul>
           </div>
