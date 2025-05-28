@@ -91,11 +91,13 @@ const Footer: React.FC = () => {
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
-                <span>123 Recycling Way, Industrial District, NY 12345</span>
+                <span>GALA NO 29, Sainath Wadi, BHANGAR GALI LINK ROAD,
+SAKINAKA, MUMBAI, Mumbai, Maharashtra, 400072
+</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-blue-400 mr-2" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 **********</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-blue-400 mr-2" />

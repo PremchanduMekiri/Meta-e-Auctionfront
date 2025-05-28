@@ -547,7 +547,8 @@ const HomePage: React.FC = () => {
                   {
                     icon: <MapPin className="h-6 w-6 text-cyan-600 mt-1" />,
                     title: "Address",
-                    content: "123 Industrial Park, Suite 456<br />New York, NY 10001"
+                    content: "GALA NO 29, Sainath Wadi, BHANGAR GALI LINK ROAD,SAKINAKA, MUMBAI, Mumbai, Maharashtra, 400072"
+
                   }
                 ].map((contact, index) => (
                   <div
