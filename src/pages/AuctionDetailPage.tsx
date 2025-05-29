@@ -171,24 +171,25 @@ const AuctionDetailPage: React.FC = () => {
           Back to Home
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-              <div className="relative bg-gray-100 aspect-video">
-                <img
-                  src={auctionImage}
-                  alt={auction.name}
-                  className="w-full max-w-5xl object-contain rounded-lg shadow-md border-4 border-gray-250 h-300 mx-auto"
-                />
-                {auctionEnded && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-red-600 text-white py-2 px-4 rounded-md font-bold text-lg">
-                      Auction Ended
-                    </div>
-                  </div>
-                )}
-              </div>
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+  <div className="lg:col-span-2">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6 w-full max-w-xl mx-auto"> {/* Reduced width */}
+      <div className="relative bg-gray-100 h-80"> {/* Smaller fixed height */}
+        <img
+          src={auctionImage}
+          alt={auction.name}
+          className="w-4/4 object-contain mx-auto h-full rounded-lg shadow-md border-4 border-gray-200" // Smaller image width
+        />
+        {auctionEnded && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-red-600 text-white py-2 px-4 rounded-md font-bold text-lg">
+              Auction Ended
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+
 
             <Card className="mb-6" padding="lg">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">{auction.name}</h1>
@@ -242,15 +243,12 @@ const AuctionDetailPage: React.FC = () => {
               <div className="flex flex-col">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="text-gray-500 text-sm mb-1">Current Bid:</p>
+                    <p className="text-gray-500 text-sm mb-1"> Staring Price:</p>
                     <p className="text-3xl font-bold text-blue-800">
                       {formatCurrency(auction.startingPrice)}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-gray-500 text-sm mb-1">Starting Price:</p>
-                    <p className="text-lg font-medium text-gray-700">{formatCurrency(auction.startingPrice)}</p>
-                  </div>
+                 
                 </div>
                 <div className="flex items-center mb-4">
                   <Clock className="h-5 w-5 text-amber-600 mr-2" />
@@ -263,7 +261,7 @@ const AuctionDetailPage: React.FC = () => {
                 </div>
                 <div className="text-sm text-gray-500">
                   <p>Auction ends: {formatDate(auction.endDate)}</p>
-                  <p className="mt-1">Bids: {auction.bids?.length || 0}</p>
+                  {/* <p className="mt-1">Bids: {auction.bids?.length || 0}</p> */}
                 </div>
               </div>
             </Card>
