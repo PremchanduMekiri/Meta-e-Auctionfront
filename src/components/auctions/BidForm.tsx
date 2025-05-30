@@ -56,20 +56,34 @@ const BidForm: React.FC<BidFormProps> = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (!users?.id || !auctionId) return;
+useEffect(() => {
+  if (!users?.id || !auctionId) return;
 
+  const fetchUserHighestBid = () => {
     axios
-      .get<{ bidAmount: number }[]>(
+      .get<{ bidAmount: number | string }[]>(
         `https://metaauction.onrender.com/bids/getBids/${users.id}/${auctionId}`,
         { withCredentials: true }
       )
       .then((res) => {
-        const amounts = res.data.map(b => b.bidAmount);
-        setUserHighestBid(amounts.length ? Math.max(...amounts) : null);
+        const amounts = res.data.map(b => Number(b.bidAmount));
+        const highest = amounts.length ? Math.max(...amounts) : null;
+        setUserHighestBid(highest);
       })
-      .catch(() => {});
-  }, [users?.id, auctionId]);
+      .catch((err) => {
+        console.error('Error fetching user bids:', err);
+        setUserHighestBid(null);
+      });
+  };
+
+  fetchUserHighestBid(); // initial fetch
+
+  const interval = setInterval(fetchUserHighestBid, 2000); // refresh every 2 seconds
+
+  return () => clearInterval(interval); // cleanup on unmount or dependency change
+}, [users?.id, auctionId]);
+
+
 
   // Update manual bid amount when live highest bid changes
   useEffect(() => {
@@ -93,7 +107,7 @@ const BidForm: React.FC<BidFormProps> = ({
     };
 
     fetchLiveBids();
-    const interval = setInterval(fetchLiveBids, 5000);
+    const interval = setInterval(fetchLiveBids, 2000);
     return () => clearInterval(interval);
   }, [auctionId]);
 
@@ -306,17 +320,19 @@ const handleAutoBidUpdate = async (e: React.FormEvent) => {
   }
 };
 
+const normalizedStatus = bidStatus?.toLowerCase().trim();
 
-  // If bidStatus is 'accepted' or 'rejected', show message and hide all forms
-  if (bidStatus?.toLowerCase() === 'accepted' || bidStatus?.toLowerCase() === 'rejected') {
-    return (
-      <div className="bg-gray-100 p-4 rounded-lg text-center">
-        <p className="text-gray-700">
-          Your bid has been ({bidStatus}) .
-        </p>
-      </div>
-    );
-  }
+if (normalizedStatus === 'accepted' || normalizedStatus === 'rejected') {
+  return (
+    <div className="bg-gray-100 p-4 rounded-lg text-center">
+      <p className="text-gray-700">
+        Your bid has been {normalizedStatus}.
+      </p>
+    </div>
+  );
+}
+
+
 
   const isAutoBidActive = hasAutoBid || autobid?.status?.toLowerCase() === 'auto';
 

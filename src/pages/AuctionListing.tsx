@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiSearch, FiX } from 'react-icons/fi';
@@ -49,6 +50,14 @@ const AuctionListPage: React.FC = () => {
   const [sortOption, setSortOption] = useState<SortOption>('none');
   const [currentPage, setCurrentPage] = useState(1);
   const [auctionsPerPage] = useState(6);
+
+  // Authentication check
+  useEffect(() => {
+    const adminId = localStorage.getItem('adminId');
+    if (!adminId) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
 
   // Fetch all auctions
   const fetchAuctions = useCallback(async () => {
@@ -216,7 +225,7 @@ const AuctionListPage: React.FC = () => {
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 : 'bg-gray-100 text-gray-700 hover:bg-teal-500 hover:text-white'
             }`}
-          >
+        >
             {number}
           </button>
         ))}

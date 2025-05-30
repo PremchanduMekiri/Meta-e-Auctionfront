@@ -262,6 +262,8 @@ const HomePage: React.FC = () => {
 </section>
 
 
+
+
       {/* Categories Section */}
       <section className="py-12 bg-gray-50 animate__animated animate__fadeInUp">
         <div className="container mx-auto px-4">

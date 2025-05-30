@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  ArrowLeft, Clock, Scale, Calendar, User
+  ArrowLeft, Clock, Calendar, User
 } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import BidForm from '../components/auctions/BidForm';
 import { formatCurrency } from '../utils/formatters';
-import { formatDate, formatTimeRemaining } from '../utils/dateUtils';
+import { formatDate } from '../utils/dateUtils';
 import axios from 'axios';
 
 type Auction = {
@@ -59,17 +58,27 @@ const AuctionDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [endTimestamp, setEndTimestamp] = useState<number | null>(null);
   const [auctions, setAuctions] = useState<UserBid[]>([]);
 
+  // Fetch auction details every 1 second
   useEffect(() => {
-    const fetchAuctionDetail = async () => {
+    if (!id) return;
+
+    const fetchAuction = async () => {
       try {
-        setLoading(true);
         const res = await axios.get<Auction>(`https://metaauction.onrender.com/auction/auctionBy/${id}`);
-        setAuction(res.data);
+        const newAuction = res.data;
+        setAuction(newAuction);
+
+        const newEndTime = new Date(newAuction.endDate).getTime();
+        if (!endTimestamp || newEndTime !== endTimestamp) {
+          setEndTimestamp(newEndTime);
+        }
+
         setError(null);
       } catch (err) {
-        console.error("Error fetching auction detail:", err);
+        console.error("Error fetching auction:", err);
         setError('Failed to load auction details');
         setAuction(null);
       } finally {
@@ -77,37 +86,19 @@ const AuctionDetailPage: React.FC = () => {
       }
     };
 
-    if (id) {
-      fetchAuctionDetail();
-    }
-  }, [id]);
+    const interval = setInterval(fetchAuction, 1000);
+    fetchAuction(); // Initial call
 
-  const fetchBidsForAuction = async (userId: string, auctionId: number) => {
-    try {
-      const res = await axios.get<UserBid[]>(`https://metaauction.onrender.com/bids/getBids/${userId}/${auctionId}`);
-      const fetchedBids = res.data;
-      console.log('Fetched bids for auction:', fetchedBids); // Debug bids
-      setAuctions(fetchedBids);
-      localStorage.setItem('userAuctionBids', JSON.stringify(fetchedBids));
-    } catch (err) {
-      console.error("Failed to fetch bids for this user:", err);
-      setAuctions([]);
-    }
-  };
+    return () => clearInterval(interval);
+  }, [id, endTimestamp]);
 
+  // Countdown timer
   useEffect(() => {
-    if (!auction) return;
-
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      fetchBidsForAuction(userId, auction.id);
-    }
-
-    const endTime = new Date(auction.endDate).getTime();
+    if (!endTimestamp) return;
 
     const updateTime = () => {
       const now = Date.now();
-      const diff = endTime - now;
+      const diff = endTimestamp - now;
 
       if (diff <= 0) {
         setTimeRemaining('');
@@ -123,10 +114,34 @@ const AuctionDetailPage: React.FC = () => {
       );
     };
 
-    updateTime(); // Initial call
-    const interval = setInterval(updateTime, 1000);
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, [endTimestamp]);
 
-    return () => clearInterval(interval); // Cleanup
+  // Fetch bids every 2 seconds
+  useEffect(() => {
+    if (!auction) return;
+
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    const fetchBids = async () => {
+      try {
+        const res = await axios.get<UserBid[]>(`https://metaauction.onrender.com/bids/getBids/${userId}/${auction.id}`);
+        const fetchedBids = res.data;
+        setAuctions(fetchedBids);
+        localStorage.setItem('userAuctionBids', JSON.stringify(fetchedBids));
+      } catch (err) {
+        console.error("Failed to fetch bids for this user:", err);
+        setAuctions([]);
+      }
+    };
+
+    const interval = setInterval(fetchBids, 1000);
+    fetchBids(); // Initial call
+
+    return () => clearInterval(interval);
   }, [auction]);
 
   if (loading) {
@@ -154,14 +169,12 @@ const AuctionDetailPage: React.FC = () => {
   const auctionEnded = timeRemaining === '';
   const defaultImage = '/scrap.jpg';
   const auctionImage = auction.image || defaultImage;
-  // Determine hasAutoBid and bidStatus from auctions
+
   const hasAutoBid = auctions.some(bid => bid.bidStatus?.toLowerCase() === 'auto');
-  // Get the most relevant bid status (prioritize 'auto', 'accepted', 'rejected', or the latest bid status)
   const bidStatus = auctions.length > 0
     ? auctions.find(bid => bid.bidStatus?.toLowerCase() === 'auto')?.bidStatus ||
-      auctions[auctions.length - 1].bidStatus // Use the latest bid status if no auto-bid
+      auctions[auctions.length - 1].bidStatus
     : undefined;
-  console.log('Bid status calculation:', { auctions, hasAutoBid, bidStatus });
 
   return (
     <Layout>
@@ -171,29 +184,28 @@ const AuctionDetailPage: React.FC = () => {
           Back to Home
         </Link>
 
-       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-  <div className="lg:col-span-2">
-    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6 w-full max-w-xl mx-auto"> {/* Reduced width */}
-      <div className="relative bg-gray-100 h-80"> {/* Smaller fixed height */}
-        <img
-          src={auctionImage}
-          alt={auction.name}
-          className="w-4/4 object-contain mx-auto h-full rounded-lg shadow-md border-4 border-gray-200" // Smaller image width
-        />
-        {auctionEnded && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-red-600 text-white py-2 px-4 rounded-md font-bold text-lg">
-              Auction Ended
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+          {/* Left Side */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6 w-full max-w-xl mx-auto">
+              <div className="relative bg-gray-100 h-80">
+                <img
+                  src={auctionImage}
+                  alt={auction.name}
+                  className="w-4/4 object-contain mx-auto h-full rounded-lg shadow-md border-4 border-gray-200"
+                />
+                {auctionEnded && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-red-600 text-white py-2 px-4 rounded-md font-bold text-lg">
+                      Auction Ended
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-
 
             <Card className="mb-6" padding="lg">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">{auction.name}</h1>
-
               <div className="flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2 mb-4">
                 <div className="flex items-center"><Calendar className="h-4 w-4 mr-1" /><span>Started {formatDate(auction.startDate)}</span></div>
                 <div className="flex items-center"><Calendar className="h-4 w-4 mr-1" /><span>Ends {formatDate(auction.endDate)}</span></div>
@@ -220,7 +232,6 @@ const AuctionDetailPage: React.FC = () => {
                     <div key={index} className="border rounded-md p-4 bg-white shadow-sm">
                       <h3 className="text-md font-semibold text-gray-800 mb-1">{item.auction.name}</h3>
                       <p className="text-sm text-gray-600 mb-2">{item.auction.description}</p>
-
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm text-gray-700">
                         <div><span className="font-medium">Bid Amount: </span><span className="text-blue-800 font-semibold">₹{item.bidAmount}</span></div>
                         <div><span className="font-medium">Bid Status: </span><span>{item.bidStatus}</span></div>
@@ -237,31 +248,29 @@ const AuctionDetailPage: React.FC = () => {
             </Card>
           </div>
 
-          {/* Right Column - Bidding */}
+          {/* Right Side */}
           <div>
             <Card className="mb-6" padding="lg">
               <div className="flex flex-col">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="text-gray-500 text-sm mb-1"> Staring Price:</p>
-                    <p className="text-3xl font-bold text-blue-800">
-                      {formatCurrency(auction.startingPrice)}
-                    </p>
+                    <p className="text-gray-500 text-sm mb-1">Starting Price:</p>
+                    <p className="text-3xl font-bold text-blue-800">{formatCurrency(auction.startingPrice)}</p>
                   </div>
-                 
                 </div>
+
                 <div className="flex items-center mb-4">
                   <Clock className="h-5 w-5 text-amber-600 mr-2" />
                   <div>
                     <p className="text-sm text-gray-500">Time Remaining:</p>
-                    <p className={`font-medium ${auctionEnded ? 'red' : 'text-amber-600'}`}>
+                    <p className={`font-medium ${auctionEnded ? 'text-red-500' : 'text-amber-600'}`}>
                       {auctionEnded ? 'Auction Ended' : timeRemaining}
                     </p>
                   </div>
                 </div>
+
                 <div className="text-sm text-gray-500">
                   <p>Auction ends: {formatDate(auction.endDate)}</p>
-                  {/* <p className="mt-1">Bids: {auction.bids?.length || 0}</p> */}
                 </div>
               </div>
             </Card>
@@ -276,7 +285,7 @@ const AuctionDetailPage: React.FC = () => {
                 auctionDescription={auction.description}
                 auctionStatus={auction.status}
                 hasAutoBid={hasAutoBid}
-                bidStatus={bidStatus} // New prop
+                bidStatus={bidStatus}
               />
             )}
           </div>

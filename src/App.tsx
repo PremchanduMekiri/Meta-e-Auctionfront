@@ -19,6 +19,7 @@ import UpdateAuctionForm from './pages/auctionUpdate';
 import CurrentAuctionDetailPage from './pages/CurrectAuctions';
 import DocumentVerificationForm from './components/auth/DocumentVerificationForm';
 import VerifyingDocuments from './pages/VerifyingDocuments';
+import Auctions from './pages/AuctionListing';
 
 function App() {
   return (
@@ -47,7 +48,8 @@ function App() {
             <Route path="/CurrentAuctionDetailPage" element={<CurrentAuctionDetailPage />} />
             {/* Add more routes as needed */}
             <Route path="/VerifingDocuments/:userId" element={<VerifyingDocuments />} />
-            {/* Fallback route */}
+            <Route path="/auctions"  element={<Auctions/>}/>
+       
           </Routes>
         </Router>
       </AuctionProvider>
