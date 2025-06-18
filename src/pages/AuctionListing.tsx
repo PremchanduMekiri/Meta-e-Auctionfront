@@ -64,7 +64,7 @@ const AuctionListPage: React.FC = () => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      const res = await axios.get('https://metaauction.onrender.com/auction/auctions');
+      const res = await axios.get('https://meta-e-auction.infororg.com/auction/auctions');
       const sortedAuctions = res.data.sort((a: Auction, b: Auction) =>
         statusOrder[a.status] - statusOrder[b.status]
       );

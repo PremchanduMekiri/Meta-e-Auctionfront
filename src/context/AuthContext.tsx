@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('https://metaauction.onrender.com/api/auth/login', {
+      const response = await fetch('https://meta-e-auction.infororg.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const adminLogin = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('https://metaauction.onrender.com/admin/login', {
+      const response = await fetch('https://meta-e-auction.infororg.com/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     role: 'supplier' | 'buyer'
   ): Promise<boolean> => {
     try {
-      const response = await fetch('https://metaauction.onrender.com/api/auth/register', {
+      const response = await fetch('https://meta-e-auction.infororg.com/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, username, password, role }),

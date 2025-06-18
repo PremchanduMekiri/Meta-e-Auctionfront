@@ -32,7 +32,7 @@ const VerifyingDocuments = () => {
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
-                const res = await axios.get(`https://metaauction.onrender.com/documents/list/${userId}`);
+                const res = await axios.get(`https://meta-e-auction.infororg.com/documents/list/${userId}`);
                 setDocuments(res.data);
             } catch (err) {
                 console.error('Error fetching documents:', err);
@@ -41,7 +41,7 @@ const VerifyingDocuments = () => {
 
         const fetchUserDetails = async () => {
             try {
-                const res = await axios.get(`https://metaauction.onrender.com/user/userBy/${userId}`);
+                const res = await axios.get(`https://meta-e-auction.infororg.com/user/userBy/${userId}`);
                 setUserDetails(res.data);
             } catch (err) {
                 console.error('Error fetching user details:', err);
@@ -55,7 +55,7 @@ const VerifyingDocuments = () => {
     }, [userId]);
 
     const handleViewDocument = (filename: string) => {
-        const fileUrl = `https://metaauction.onrender.com/documents/download/${userId}/${filename}`;
+        const fileUrl = `https://meta-e-auction.infororg.com/documents/download/${userId}/${filename}`;
         setSelectedDoc(fileUrl);
         setPreviewError(null);
     };
@@ -63,9 +63,9 @@ const VerifyingDocuments = () => {
     const handleAccept = async () => {
         setIsAccepting(true);
         try {
-            await axios.post(`https://metaauction.onrender.com/admin/verify/user/${userId}`);
+            await axios.post(`https://meta-e-auction.infororg.com/admin/verify/user/${userId}`);
             setMessage("Document verified successfully");
-            const res = await axios.get(`https://metaauction.onrender.com/user/userBy/${userId}`);
+            const res = await axios.get(`https://meta-e-auction.infororg.com/user/userBy/${userId}`);
             setUserDetails(res.data);
         } catch (err) {
             setMessage("Failed to verify document");
@@ -78,10 +78,10 @@ const VerifyingDocuments = () => {
     const handleReject = async () => {
         setIsRejecting(true);
         try {
-            await axios.delete(`https://metaauction.onrender.com/documents/clear/${userId}`);
+            await axios.delete(`https://meta-e-auction.infororg.com/documents/clear/${userId}`);
             setDocuments([]);
             setMessage("The user got rejected");
-            const res = await axios.get(`https://metaauction.onrender.com/user/userBy/${userId}`);
+            const res = await axios.get(`https://meta-e-auction.infororg.com/user/userBy/${userId}`);
             setUserDetails(res.data);
         } catch (err) {
             setMessage("Failed to reject the user");

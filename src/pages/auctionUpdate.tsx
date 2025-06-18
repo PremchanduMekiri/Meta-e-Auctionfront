@@ -26,7 +26,7 @@ const UpdateAuctionForm: React.FC = () => {
     if (!auctionFromState && auction?.id) {
       const fetchAuction = async () => {
         try {
-          const response = await axios.get(`https://metaauction.onrender.com/auction/${auction.id}`);
+          const response = await axios.get(`https://meta-e-auction.infororg.com/auction/${auction.id}`);
           setAuction(response.data);
         } catch (error) {
           console.error('Error fetching auction:', error);
@@ -40,7 +40,7 @@ const UpdateAuctionForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.put('https://metaauction.onrender.com/admin/update/auction', auction);
+      await axios.put('https://meta-e-auction.infororg.com/admin/update/auction', auction);
       alert('Auction updated successfully');
       navigate(0); // Reloads the current page
     } catch (error) {

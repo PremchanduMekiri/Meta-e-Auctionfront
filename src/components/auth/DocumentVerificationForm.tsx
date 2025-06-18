@@ -63,7 +63,7 @@ const DocumentVerificationForm: React.FC = () => {
     if (formData.idProof) data.append('files', formData.idProof);
 
     try {
-      const response = await fetch(`https://metaauction.onrender.com/documents/upload/${userData.id}`, {
+      const response = await fetch(`https://meta-e-auction.infororg.com/documents/upload/${userData.id}`, {
         method: 'POST',
         body: data,
       });

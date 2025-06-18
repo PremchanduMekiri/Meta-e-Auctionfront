@@ -132,7 +132,7 @@ const AdminDashboard: React.FC = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('https://metaauction.onrender.com/admin/inserting/auction', {
+      const response = await fetch('https://meta-e-auction.infororg.com/admin/inserting/auction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ const AdminDashboard: React.FC = () => {
   // Fetch all auctions
   const fetchAllAuctions = async () => {
     try {
-      const res = await axios.get('https://metaauction.onrender.com/admin/AllAuctions');
+      const res = await axios.get('https://meta-e-auction.infororg.com/admin/AllAuctions');
       setAllAuctions(res.data);
     } catch (error) {
       console.error('Error fetching auctions:', error);
@@ -190,7 +190,7 @@ const AdminDashboard: React.FC = () => {
   // Fetch current auctions
   const fetchCurrentAuctions = async () => {
     try {
-      const res = await axios.get('https://metaauction.onrender.com/auction/runningAuctions');
+      const res = await axios.get('https://meta-e-auction.infororg.com/auction/runningAuctions');
       setCurrentAuctions(res.data);
     } catch (error) {
       console.error('Error fetching current auctions:', error);
@@ -201,7 +201,7 @@ const AdminDashboard: React.FC = () => {
   // Fetch all users
   const fetchViewAllUsers = async () => {
     try {
-      const res = await axios.get('https://metaauction.onrender.com/admin/users');
+      const res = await axios.get('https://meta-e-auction.infororg.com/admin/users');
       setViewAllUsers(res.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -212,7 +212,7 @@ const AdminDashboard: React.FC = () => {
   // Fetch ended auctions
   const fetchEndedAuctions = async () => {
     try {
-      const res = await axios.get('https://metaauction.onrender.com/auction/endedAuctions');
+      const res = await axios.get('https://meta-e-auction.infororg.com/auction/endedAuctions');
       setEnded(res.data);
     } catch (error) {
       console.error('Error fetching ended auctions:', error);
@@ -223,7 +223,7 @@ const AdminDashboard: React.FC = () => {
   // Fetch upcoming auctions
   const fetchUpcomingAuctions = async () => {
     try {
-      const res = await axios.get('https://metaauction.onrender.com/auction/upcomingAuctions');
+      const res = await axios.get('https://meta-e-auction.infororg.com/auction/upcomingAuctions');
       setNewAuctions(res.data);
     } catch (error) {
       console.error('Error fetching upcoming auctions:', error);
@@ -247,11 +247,11 @@ const AdminDashboard: React.FC = () => {
     try {
       let response;
       if (newStatus === 'active') {
-        response = await axios.post(`https://metaauction.onrender.com/admin/active/user/${userId}`, {}, {
+        response = await axios.post(`https://meta-e-auction.infororg.com/admin/active/user/${userId}`, {}, {
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        response = await axios.delete(`https://metaauction.onrender.com/admin/delete/user/${userId}`, {
+        response = await axios.delete(`https://meta-e-auction.infororg.com/admin/delete/user/${userId}`, {
           headers: { 'Content-Type': 'application/json' },
         });
       }
@@ -283,13 +283,13 @@ const AdminDashboard: React.FC = () => {
     let response;
     if (isDisabling) {
       // Disable auction
-      response = await axios.delete('https://metaauction.onrender.com/admin/delete/auction', {
+      response = await axios.delete('https://meta-e-auction.infororg.com/admin/delete/auction', {
         data: { id: auction.id },
         withCredentials: true,
       });
     } else {
       // Enable auction
-      response = await axios.put(`https://metaauction.onrender.com/admin/recover/auction/${auction.id}`, {}, {
+      response = await axios.put(`https://meta-e-auction.infororg.com/admin/recover/auction/${auction.id}`, {}, {
         withCredentials: true,
       });
     }

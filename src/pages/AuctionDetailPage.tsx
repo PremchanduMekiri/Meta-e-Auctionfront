@@ -67,7 +67,7 @@ const AuctionDetailPage: React.FC = () => {
 
     const fetchAuction = async () => {
       try {
-        const res = await axios.get<Auction>(`https://metaauction.onrender.com/auction/auctionBy/${id}`);
+        const res = await axios.get<Auction>(`https://meta-e-auction.infororg.com/auction/auctionBy/${id}`);
         const newAuction = res.data;
         setAuction(newAuction);
 
@@ -128,7 +128,7 @@ const AuctionDetailPage: React.FC = () => {
 
     const fetchBids = async () => {
       try {
-        const res = await axios.get<UserBid[]>(`https://metaauction.onrender.com/bids/getBids/${userId}/${auction.id}`);
+        const res = await axios.get<UserBid[]>(`https://meta-e-auction.infororg.com/bids/getBids/${userId}/${auction.id}`);
         const fetchedBids = res.data;
         setAuctions(fetchedBids);
         localStorage.setItem('userAuctionBids', JSON.stringify(fetchedBids));

@@ -28,7 +28,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     setIsLoading(true);
     try {
       // Try user login first
-      const userResponse = await fetch('https://metaauction.onrender.com/api/auth/login', {
+      const userResponse = await fetch('https://meta-e-auction.infororg.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -55,7 +55,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       }
 
       // If user login fails, try admin login
-      const adminResponse = await fetch('https://metaauction.onrender.com/admin/login', {
+      const adminResponse = await fetch('https://meta-e-auction.infororg.com/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, passwordHash: password }),

@@ -48,7 +48,7 @@ const AuctionUserDashboard: React.FC = () => {
     const fetchUserAuctions = async () => {
       if (!userId) return;
       try {
-        const response = await fetch(`https://metaauction.onrender.com/user/auctions/${userId}`);
+        const response = await fetch(`https://meta-e-auction.infororg.com/user/auctions/${userId}`);
         if (!response.ok) throw new Error("Failed to fetch participated auctions");
         const data = await response.json();
         const sanitizedData: Auction[] = data.map((auction: any) => {
@@ -91,7 +91,7 @@ const AuctionUserDashboard: React.FC = () => {
     const fetchWonAuctions = async () => {
       if (!userId) return;
       try {
-        const response = await fetch(`https://metaauction.onrender.com/user/wonAuctions/${userId}`);
+        const response = await fetch(`https://meta-e-auction.infororg.com/user/wonAuctions/${userId}`);
         if (!response.ok) throw new Error("Failed to fetch won auctions");
         const data = await response.json();
         const sanitizedData: Auction[] = data.map((auction: any) => ({

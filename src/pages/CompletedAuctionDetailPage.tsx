@@ -128,7 +128,7 @@ const CompletedAuctionDetailPage: React.FC = () => {
 
     setLoadingAuction(true);
     try {
-      const res = await fetch(`https://metaauction.onrender.com/auction/auctionBy/${id}`);
+      const res = await fetch(`https://meta-e-auction.infororg.com/auction/auctionBy/${id}`);
       if (!res.ok) {
         throw new Error(`Failed to fetch auction. Status: ${res.status} ${res.statusText}`);
       }
@@ -172,7 +172,7 @@ const CompletedAuctionDetailPage: React.FC = () => {
 
     setLoadingBids(true);
     try {
-      const res = await fetch(`https://metaauction.onrender.com/bids/getAllBids/${id}`);
+      const res = await fetch(`https://meta-e-auction.infororg.com/bids/getAllBids/${id}`);
       if (!res.ok) {
         throw new Error(`Failed to fetch bids. Status: ${res.status} ${res.statusText}`);
       }
@@ -223,7 +223,7 @@ const CompletedAuctionDetailPage: React.FC = () => {
     };
 
     try {
-      const res = await fetch("https://metaauction.onrender.com/admin/acceptBid", {
+      const res = await fetch("https://meta-e-auction.infororg.com/admin/acceptBid", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -274,7 +274,7 @@ const CompletedAuctionDetailPage: React.FC = () => {
 
     setIsProcessing(true);
     try {
-      const res = await fetch(`https://metaauction.onrender.com/admin/rejectBid/${selectedBidToReject.id}`, {
+      const res = await fetch(`https://meta-e-auction.infororg.com/admin/rejectBid/${selectedBidToReject.id}`, {
         method: "POST",
       });
       if (!res.ok) {

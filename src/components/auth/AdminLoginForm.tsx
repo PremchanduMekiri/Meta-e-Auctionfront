@@ -24,7 +24,7 @@ const AdminLoginForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://metaauction.onrender.com/admin/login', {
+      const response = await fetch('https://meta-e-auction.infororg.com/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

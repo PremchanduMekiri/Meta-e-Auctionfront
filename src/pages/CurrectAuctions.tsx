@@ -50,7 +50,7 @@ const CurrentAuctionDetailPage: React.FC = () => {
     if (!id) return;
 
     setLoadingAuction(true);
-    fetch(`https://metaauction.onrender.com/auction/auctionBy/${id}`)
+    fetch(`https://meta-e-auction.infororg.com/auction/auctionBy/${id}`)
       .then((res) => res.json())
       .then((data: Auction) => {
         setAuction(data);
@@ -63,7 +63,7 @@ const CurrentAuctionDetailPage: React.FC = () => {
       });
 
     setLoadingBids(true);
-    fetch(`https://metaauction.onrender.com/bids/getAllBids/${id}`)
+    fetch(`https://meta-e-auction.infororg.com/bids/getAllBids/${id}`)
       .then((res) => res.json())
       .then((data: Bid[]) => {
         setBids(data);
@@ -84,7 +84,7 @@ const CurrentAuctionDetailPage: React.FC = () => {
       bidAmount: bid.bidAmount,
     };
 
-    fetch("https://metaauction.onrender.com/admin/acceptBid", {
+    fetch("https://meta-e-auction.infororg.com/admin/acceptBid", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -119,7 +119,7 @@ const CurrentAuctionDetailPage: React.FC = () => {
 
   const confirmReject = () => {
     if (selectedBidToReject) {
-      fetch(`https://metaauction.onrender.com/admin/rejectBid/${selectedBidToReject.id}`, {
+      fetch(`https://meta-e-auction.infororg.com/admin/rejectBid/${selectedBidToReject.id}`, {
         method: "POST",
       })
         .then((res) => res.json())

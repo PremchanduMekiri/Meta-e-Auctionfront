@@ -53,7 +53,7 @@ const UpdateProfile: React.FC = () => {
     if (formData && formData.id) {
       console.log('Submitting form data:', formData);
       try {
-        const response = await axios.put(`https://metaauction.onrender.com/user/update/${formData.id}`, formData);
+        const response = await axios.put(`https://meta-e-auction.infororg.com/user/update/${formData.id}`, formData);
         console.log('Response from server:', response.data);
         setSuccessMessage('Profile updated successfully!');
         localStorage.setItem('userData', JSON.stringify(response.data));
@@ -72,7 +72,7 @@ const UpdateProfile: React.FC = () => {
   const handleDelete = async () => {
     if (formData && formData.id) {
       try {
-        await axios.delete(`https://metaauction.onrender.com/user/delete/${formData.id}`);
+        await axios.delete(`https://meta-e-auction.infororg.com/user/delete/${formData.id}`);
         setSuccessMessage('Profile deleted successfully!');
         localStorage.removeItem('userData');
         setTimeout(() => {

@@ -55,7 +55,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`https://metaauction.onrender.com/api/auth/register`, {
+      const response = await fetch(`https://meta-e-auction.infororg.com/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

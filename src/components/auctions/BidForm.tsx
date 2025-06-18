@@ -62,7 +62,7 @@ useEffect(() => {
   const fetchUserHighestBid = () => {
     axios
       .get<{ bidAmount: number | string }[]>(
-        `https://metaauction.onrender.com/bids/getBids/${users.id}/${auctionId}`,
+        `https://meta-e-auction.infororg.com/bids/getBids/${users.id}/${auctionId}`,
         { withCredentials: true }
       )
       .then((res) => {
@@ -94,7 +94,7 @@ useEffect(() => {
     const fetchLiveBids = async () => {
       try {
         const res = await axios.get<{ bidAmount: number }[]>(
-          `https://metaauction.onrender.com/bids/getAllBids/${auctionId}`,
+          `https://meta-e-auction.infororg.com/bids/getAllBids/${auctionId}`,
           { withCredentials: true }
         );
         const bids = res.data || [];
@@ -166,7 +166,7 @@ useEffect(() => {
       };
 
       const response = await axios.post(
-        `https://metaauction.onrender.com/bids/bid/${payload.userId}/${payload.auctionId}/${payload.bidAmount}`,
+        `https://meta-e-auction.infororg.com/bids/bid/${payload.userId}/${payload.auctionId}/${payload.bidAmount}`,
         payload,
         { withCredentials: true }
       );
@@ -228,7 +228,7 @@ const handleAutoBidSetup = async (e: React.FormEvent) => {
     console.log('Auto-bid setup payload:', payload);
 
     const response = await axios.post(
-      'https://metaauction.onrender.com/bids/auto-bid/setup',
+      'https://meta-e-auction.infororg.com/bids/auto-bid/setup',
       payload,
       { withCredentials: true }
     );
@@ -295,7 +295,7 @@ const handleAutoBidUpdate = async (e: React.FormEvent) => {
     console.log('Auto-bid update payload:', payload);
 
     const response = await axios.post(
-      'https://metaauction.onrender.com/bids/update/auto-bid',
+      'https://meta-e-auction.infororg.com/bids/update/auto-bid',
       payload,
       { withCredentials: true }
     );

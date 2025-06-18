@@ -44,7 +44,7 @@ export const UserProfile: React.FC = () => {
     if (userData?.id) {
       // Use template literal for the API URL
       axios
-        .get(`https://metaauction.onrender.com/user/userBy/${userData.id}`)
+        .get(`https://meta-e-auction.infororg.com/user/userBy/${userData.id}`)
         .then((res) => {
           setUserDetails(res.data);
           setFormData(res.data);  // Initialize formData with the fetched user data
@@ -75,7 +75,7 @@ export const UserProfile: React.FC = () => {
       try {
         // Use template literal for the API URL
         const response = await axios.put(
-          `https://metaauction.onrender.com/user/update/${formData.id}`,
+          `https://meta-e-auction.infororg.com/user/update/${formData.id}`,
           updatedData
         );
         alert('Profile updated successfully!');
@@ -99,7 +99,7 @@ export const UserProfile: React.FC = () => {
       console.log(`Attempting to delete user with ID: ${formData.id}`);
       
       // Send the DELETE request
-      const response = await axios.delete(`https://metaauction.onrender.com/user/delete/${formData.id}`, {
+      const response = await axios.delete(`https://meta-e-auction.infororg.com/user/delete/${formData.id}`, {
         headers: {
           'Content-Type': 'application/json', // Add any required headers
           // Include authorization if needed

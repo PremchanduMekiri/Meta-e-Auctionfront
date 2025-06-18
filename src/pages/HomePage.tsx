@@ -76,7 +76,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchUpcomingAuctions = async () => {
       try {
-        const res = await axios.get<Auction[]>('https://metaauction.onrender.com/auction/upcomingAuctions');
+        const res = await axios.get<Auction[]>('https://meta-e-auction.infororg.com/auction/upcomingAuctions');
         console.log(res.data);
         console.log("upcoming Connection Data|" + res.data);
         setNewauctions(res.data);
@@ -105,7 +105,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchCurrentAuctions = async () => {
       try {
-        const res = await axios.get('https://metaauction.onrender.com/auction/runningAuctions');
+        const res = await axios.get('https://meta-e-auction.infororg.com/auction/runningAuctions');
         console.log("current Connection Data|" + res.data);
         setCurrentauctions(res.data);
       } catch (error) {
@@ -123,7 +123,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchAllAuctions = async () => {
       try {
-        const res = await axios.get('https://metaauction.onrender.com/auction/auctions');
+        const res = await axios.get('https://meta-e-auction.infororg.com/auction/auctions');
         console.log("current Connection Data|" + res.data);
         setAllauctions(res.data);
       } catch (error) {
